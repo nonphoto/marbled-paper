@@ -1,9 +1,13 @@
-const positions = [
+const vertexPositions = [
 	-1, -1, 0,
 	-1, 1, 0,
 	1, -1, 0,
 	1, 1, 0
-];
+]
+
+const dropPositions = [
+  0, 0, 100
+]
 
 function loadShader(gl, source, type) {
 	const shader = gl.createShader(type);
@@ -51,16 +55,18 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
 	gl.clearColor(1.0, 1.0, 1.0, 1.0)
 
 	const vertexPositionAttribute = gl.getAttribLocation(program, 'vertexPosition')
-	const resolutionUniform = gl.getUniformLocation(program, 'resolution')
+  const resolutionUniform = gl.getUniformLocation(program, 'resolution')
+  const dropPositionsUniform = gl.getUniformLocation(program, 'dropPositions');
 
 	const vertexPositionBuffer = gl.createBuffer()
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer)
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexPositions), gl.STATIC_DRAW)
 
 	function draw() {
 		gl.clear(gl.COLOR_BUFFER_BIT)
 	
-		gl.uniform2f(resolutionUniform, canvas.width, canvas.height)
+    gl.uniform2f(resolutionUniform, canvas.width, canvas.height)
+    gl.uniform3fv(dropPositionsUniform, dropPositions);
 
 		gl.enableVertexAttribArray(vertexPositionAttribute)
 		gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0)
