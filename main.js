@@ -6,7 +6,15 @@ const vertexPositions = [
 ]
 
 const dropPositions = [
-  0, 0, 100
+  0, 0
+]
+
+const dropSizes = [
+  100.0
+]
+
+const dropColors = [
+  1, 0, 0
 ]
 
 function loadShader(gl, source, type) {
@@ -57,6 +65,8 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
 	const vertexPositionAttribute = gl.getAttribLocation(program, 'vertexPosition')
   const resolutionUniform = gl.getUniformLocation(program, 'resolution')
   const dropPositionsUniform = gl.getUniformLocation(program, 'dropPositions');
+  const dropSizesUniform = gl.getUniformLocation(program, 'dropSizes')
+  const dropColorsUniform = gl.getUniformLocation(program, 'dropColors')
 
 	const vertexPositionBuffer = gl.createBuffer()
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer)
@@ -66,7 +76,9 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
 		gl.clear(gl.COLOR_BUFFER_BIT)
 	
     gl.uniform2f(resolutionUniform, canvas.width, canvas.height)
-    gl.uniform3fv(dropPositionsUniform, dropPositions);
+    gl.uniform2fv(dropPositionsUniform, dropPositions);
+    gl.uniform1fv(dropSizesUniform, dropSizes);
+    gl.uniform3fv(dropColorsUniform, dropColors);
 
 		gl.enableVertexAttribArray(vertexPositionAttribute)
 		gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0)
