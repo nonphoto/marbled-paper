@@ -5,23 +5,20 @@ const vertexPositions = [
 	1, 1, 0
 ]
 
-const dropCount = 3
+const dropCount = 2
 
 const dropPositions = [
   100, 100,
-  150, 150,
   200, 200,
 ]
 
 const dropSizes = [
-  100.0,
   100.0,
   100.0
 ]
 
 const dropColors = [
   1, 0, 0,
-  0, 1, 0,
   0, 0, 1
 ]
 
