@@ -5,6 +5,9 @@ const vertexPositions = [
 	1, 1, 0
 ]
 
+const minDropSize = 50
+const maxDropSize = 100
+
 const colors = [
   [1.00, 0.96, 0.91],
   [0.59, 0.05, 0.07],
@@ -20,7 +23,7 @@ let dropColors = []
 
 function addDrop(x, y) {
   const color = colors[dropCount % colors.length]
-  const size = 75 + (Math.random() * 50)
+  const size = minDropSize + (Math.random() * (maxDropSize - minDropSize))
   dropPositions.unshift(x, y)
   dropColors.unshift(color[0], color[1], color[2])
   dropSizes.unshift(size)

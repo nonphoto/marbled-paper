@@ -20,9 +20,8 @@ vec4 getColor(vec2 position) {
     }
 
     vec2 c = dropPositions[i];
-    // float r = dropSizes[i];
-    float r = 100.0;
-
+    float r = dropSizes[i];
+    
     vec2 d = p - c;
     float l = length(d);
     if (l - r < 0.0) {
