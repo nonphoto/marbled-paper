@@ -1,6 +1,6 @@
 precision mediump float;
 
-const int MAX_DROPS = 8;
+const int MAX_DROPS = 256;
 
 uniform int dropCount;
 uniform vec2 dropPositions[MAX_DROPS];
