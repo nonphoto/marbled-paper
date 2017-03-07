@@ -94,18 +94,21 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexPositions), gl.STATIC_DRAW)
 
 	function draw() {
-		gl.clear(gl.COLOR_BUFFER_BIT)
-	
-    gl.uniform2f(resolutionUniform, canvas.width, canvas.height)
-    gl.uniform1i(dropCountUniform, dropCount)
-    gl.uniform2fv(dropPositionsUniform, dropPositions)
-    gl.uniform1fv(dropSizesUniform, dropSizes)
-    gl.uniform3fv(dropColorsUniform, dropColors)
+    gl.clear(gl.COLOR_BUFFER_BIT)
+    
+    if (dropCount > 0) {
+      gl.uniform2f(resolutionUniform, canvas.width, canvas.height)
+      gl.uniform1i(dropCountUniform, dropCount)
+      gl.uniform2fv(dropPositionsUniform, dropPositions)
+      gl.uniform1fv(dropSizesUniform, dropSizes)
+      gl.uniform3fv(dropColorsUniform, dropColors)
 
-		gl.enableVertexAttribArray(vertexPositionAttribute)
-		gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0)
+      gl.enableVertexAttribArray(vertexPositionAttribute)
+      gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0)
 
-		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+    }  
+    
 		requestAnimationFrame(draw)
 	}
 
