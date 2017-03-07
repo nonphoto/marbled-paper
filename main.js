@@ -5,8 +5,10 @@ const vertexPositions = [
 	1, 1, 0
 ]
 
-const minDropSize = 50
+const minDropSize = 10
 const maxDropSize = 100
+
+const viscosity = 10
 
 const colors = [
   [1.00, 0.96, 0.91],
@@ -21,8 +23,13 @@ let drops = []
 class Drop {
   constructor(x, y) {
     this.position = [x, y]
-    this.size = minDropSize + (Math.random() * (maxDropSize - minDropSize))
+    this.size = 0
+    this.targetSize = minDropSize + (Math.random() * (maxDropSize - minDropSize))
     this.color = colors[Math.floor(Math.random() * colors.length)]
+  }
+
+  update() {
+    this.size += (this.targetSize - this.size) / viscosity
   }
 }
 
@@ -107,6 +114,8 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
       gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0)
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+
+      drops[0].update()
     }  
 
 		requestAnimationFrame(draw)
