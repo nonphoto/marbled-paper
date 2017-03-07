@@ -17,11 +17,11 @@ vec4 getColor(vec2 p, vec2 c, float r) {
   vec2 d = p - c;
   float l = length(d);
   if (l - r < 0.0) {
-    // Point came from inside drop
     color = vec4(dropColors[0], 1);
   }
   else {
-    vec2 p2 = p - (d / l) * r;
+    float l2 = sqrt((l * l) - (r * r));
+    vec2 p2 = c + (d / l) * l2;
     for (int i = 1; i < MAX_DROPS; i++) {
       if (i > dropCount) {
         break;
