@@ -5,21 +5,27 @@ const vertexPositions = [
 	1, 1, 0
 ]
 
-const dropCount = 2
+const dropCount = 4
 
 const dropPositions = [
   100, 100,
+  300, 300,
   200, 200,
+  250, 250,  
 ]
 
 const dropSizes = [
+  100.0,
+  100.0,
   100.0,
   100.0
 ]
 
 const dropColors = [
   1, 0, 0,
-  0, 0, 1
+  0, 1, 0,
+  0, 0, 1,
+  0, 1, 1
 ]
 
 function loadShader(gl, source, type) {

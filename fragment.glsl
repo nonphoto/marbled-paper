@@ -11,31 +11,31 @@ bool circleTest(vec2 p, vec2 c, float r) {
   return length(p - c) < r;
 }
 
-vec4 getColor(vec2 p, vec2 c, float r) {
-  vec4 color = vec4(0.5, 0.5, 0.5, 1);
+vec4 getColor(vec2 position) {
+  vec2 p = position;
 
-  vec2 d = p - c;
-  float l = length(d);
-  if (l - r < 0.0) {
-    color = vec4(dropColors[0], 1);
-  }
-  else {
-    float l2 = sqrt((l * l) - (r * r));
-    vec2 p2 = c + (d / l) * l2;
-    for (int i = 1; i < MAX_DROPS; i++) {
-      if (i > dropCount) {
-        break;
-      }
+  for (int i = 0; i < MAX_DROPS; i++) {
+    if (i >= dropCount) {
+      break;
+    }
 
-      if (circleTest(p2, dropPositions[i], dropSizes[i])) {
-        color = vec4(dropColors[i], 1);
-      }
+    vec2 c = dropPositions[i];
+    float r = dropSizes[i];
+
+    vec2 d = p - c;
+    float l = length(d);
+    if (l - r < 0.0) {
+      return vec4(dropColors[i], 1);
+    }
+    else {
+      float l2 = sqrt((l * l) - (r * r));
+      p = c + (d / l) * l2;
     }
   }
 
-  return color;
+  return vec4(0.5, 0.5, 0.5, 1);
 }
 
 void main() {
-  gl_FragColor = getColor(gl_FragCoord.xy, dropPositions[0], dropSizes[0]);
+  gl_FragColor = getColor(gl_FragCoord.xy);
 }
