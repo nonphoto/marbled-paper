@@ -16,18 +16,14 @@ const colors = [
   [0.89, 0.75, 0.33]
 ]
 
-let dropCount = 0
-let dropPositions = []
-let dropSizes = []
-let dropColors = []
+let drops = []
 
-function addDrop(x, y) {
-  const color = colors[dropCount % colors.length]
-  const size = minDropSize + (Math.random() * (maxDropSize - minDropSize))
-  dropPositions.unshift(x, y)
-  dropColors.unshift(color[0], color[1], color[2])
-  dropSizes.unshift(size)
-  dropCount += 1;
+class Drop {
+  constructor(x, y) {
+    this.position = [x, y]
+    this.size = minDropSize + (Math.random() * (maxDropSize - minDropSize))
+    this.color = colors[Math.floor(Math.random() * colors.length)]
+  }
 }
 
 function loadShader(gl, source, type) {
@@ -39,7 +35,7 @@ function loadShader(gl, source, type) {
 		console.error("Shader compilation failed." + gl.getShaderInfoLog(shader));
     gl.deleteShader(shader);
     
-		return null;
+  	return null;
   }
   
 	return shader;
@@ -54,7 +50,7 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
     const bounds = canvas.getBoundingClientRect()
     const x = e.clientX - bounds.left
     const y = -(e.clientY - bounds.bottom)
-    addDrop(x, y)
+    drops.unshift(new Drop(x, y))
   })
 
 	let gl = null
@@ -96,9 +92,13 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
 	function draw() {
     gl.clear(gl.COLOR_BUFFER_BIT)
     
-    if (dropCount > 0) {
+    if (drops.length > 0) {
+      const dropPositions = drops.map(drop => drop.position).reduce((positions, position) => positions.concat(position))
+      const dropSizes = drops.map(drop => drop.size)
+      const dropColors = drops.map(drop => drop.color).reduce((colors, color) => colors.concat(color))
+
       gl.uniform2f(resolutionUniform, canvas.width, canvas.height)
-      gl.uniform1i(dropCountUniform, dropCount)
+      gl.uniform1i(dropCountUniform, drops.length)
       gl.uniform2fv(dropPositionsUniform, dropPositions)
       gl.uniform1fv(dropSizesUniform, dropSizes)
       gl.uniform3fv(dropColorsUniform, dropColors)
@@ -108,7 +108,7 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
     }  
-    
+
 		requestAnimationFrame(draw)
 	}
 
