@@ -5,28 +5,27 @@ const vertexPositions = [
 	1, 1, 0
 ]
 
-const dropCount = 4
+let dropCount = 0
 
-const dropPositions = [
-  100, 100,
-  300, 300,
-  200, 200,
-  250, 250,  
-]
+let dropPositions = []
 
-const dropSizes = [
-  100.0,
-  100.0,
-  100.0,
-  100.0
-]
+let dropSizes = []
 
 const dropColors = [
-  1, 0, 0,
-  0, 1, 0,
+  0, 0, 0,
   0, 0, 1,
-  0, 1, 1
+  0, 1, 0,
+  0, 1, 1,
+  1, 0, 0,
+  1, 0, 1,
+  1, 1, 0,
+  1, 1, 1
 ]
+
+function addDrop(x, y) {
+  dropPositions.unshift(x, y)
+  dropCount += 1;
+}
 
 function loadShader(gl, source, type) {
 	const shader = gl.createShader(type);
@@ -48,7 +47,14 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
   canvas.width = 800
   canvas.height = 600
 
-	var gl = null
+  canvas.addEventListener('click', (e) => {
+    const bounds = canvas.getBoundingClientRect()
+    const x = e.clientX - bounds.left
+    const y = -(e.clientY - bounds.bottom)
+    addDrop(x, y)
+  })
+
+	let gl = null
 	gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl")
 	if (!gl) {
 		alert("Unable to initialize WebGL. Maybe your browser doesn't support it.")

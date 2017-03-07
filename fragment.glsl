@@ -1,6 +1,6 @@
 precision mediump float;
 
-const int MAX_DROPS = 256;
+const int MAX_DROPS = 8;
 
 uniform int dropCount;
 uniform vec2 dropPositions[MAX_DROPS];
@@ -20,7 +20,8 @@ vec4 getColor(vec2 position) {
     }
 
     vec2 c = dropPositions[i];
-    float r = dropSizes[i];
+    // float r = dropSizes[i];
+    float r = 100.0;
 
     vec2 d = p - c;
     float l = length(d);
