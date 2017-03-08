@@ -1,5 +1,8 @@
 precision mediump float;
 
+const float ALPHA = 240.0;
+const float LAMBDA = 8.0;
+
 const int TYPE_DROP = 0;
 const int TYPE_LINE = 1;
 
@@ -53,7 +56,14 @@ vec4 getColorAtPosition(vec2 position) {
     }
 
     else if (type == TYPE_LINE) {
-      
+      vec2 c = operationPositions[i];
+      vec2 m = normalize(operationArgs[i] - c);
+
+      vec2 n = vec2(-m.y, m.x);
+      vec2 d = p - c;
+      float l = length(dot(d, n));
+      float l2 = (ALPHA * LAMBDA) / (l + LAMBDA);
+      p = p - (m * l2);
     }
 
     else {
