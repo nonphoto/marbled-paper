@@ -1,5 +1,7 @@
 precision mediump float;
 
+const bool ANTIALIASING = false;
+
 const float ALPHA = 240.0;
 const float LAMBDA = 8.0;
 
@@ -75,5 +77,21 @@ vec4 getColorAtPosition(vec2 position) {
 }
 
 void main() {
-  gl_FragColor = getColorAtPosition(gl_FragCoord.xy);
+  if (ANTIALIASING) {
+    vec2 p = gl_FragCoord.xy;
+    vec2 p1 = vec2(0.125, 0.375);
+    vec2 p2 = vec2(-0.375, 0.125);
+    vec2 p3 = vec2(0.375, -0.125);
+    vec2 p4 = vec2(-0.125, -0.375);
+
+    vec4 c1 = getColorAtPosition(p + p1);
+    vec4 c2 = getColorAtPosition(p + p2);
+    vec4 c3 = getColorAtPosition(p + p3);
+    vec4 c4 = getColorAtPosition(p + p4);
+
+    gl_FragColor = mix(mix(c1, c2, 0.5), mix(c3, c4, 0.5), 0.5);
+  }
+  else {
+    gl_FragColor = getColorAtPosition(gl_FragCoord.xy);
+  }
 }
