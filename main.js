@@ -39,11 +39,11 @@ class Drop {
   }
 
   position() {
-    return [this.x, this.y]
+    return [this.x, this.y, 0, 0]
   }
 
   args() {
-    return [this.size, this.color, 0]
+    return [this.size, this.color]
   }
 
   type() {
@@ -58,7 +58,7 @@ class Line {
     this.x2 = x2
     this.y2 = y2
     this.size = 0
-    this.targetSize = lineSize
+    this.targetSize = 1
   }
 
   update() {
@@ -66,11 +66,11 @@ class Line {
   }
 
   position() {
-    return [this.x1, this.y1]
+    return [this.x1, this.y1, this.x2, this.y2]
   }
 
   args() {
-    return [this.x2, this.y2, this.size]
+    return [this.size, 0]
   }
 
   type() {
@@ -117,7 +117,6 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
         operations.unshift(new Line(x, y, x + 1, y + 1))
         break;
       case "pattern-comb":
-        operations.un
       default:
         break;
     }
@@ -172,8 +171,8 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
       gl.uniform3fv(colorsUniform, colors)
       gl.uniform1i(operationCountUniform, operations.length)
       gl.uniform1iv(operationTypesUniform, operationTypes)
-      gl.uniform2fv(operationPositionsUniform, operationPositions)
-      gl.uniform3fv(operationArgsUniform, operationArgs)
+      gl.uniform4fv(operationPositionsUniform, operationPositions)
+      gl.uniform2fv(operationArgsUniform, operationArgs)
 
       gl.enableVertexAttribArray(vertexPositionAttribute)
       gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0)

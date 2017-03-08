@@ -1,12 +1,13 @@
 precision mediump float;
 
-const bool ANTIALIASING = false;
+const bool ANTIALIASING = true;
 
-const float ALPHA = 240.0;
+const float ALPHA = 150.0;
 const float LAMBDA = 8.0;
 
 const int TYPE_DROP = 0;
 const int TYPE_LINE = 1;
+const int TYPE_COMB = 2;
 
 const int MAX_COLORS = 8;
 const int MAX_PATTERNS = 256;
@@ -15,8 +16,8 @@ uniform vec3 colors[MAX_COLORS];
 
 uniform int operationCount;
 uniform int operationTypes[MAX_PATTERNS];
-uniform vec2 operationPositions[MAX_PATTERNS];
-uniform vec3 operationArgs[MAX_PATTERNS];
+uniform vec4 operationPositions[MAX_PATTERNS];
+uniform vec2 operationArgs[MAX_PATTERNS];
 
 bool circleTest(vec2 p, vec2 c, float r) {
   return length(p - c) < r;
@@ -42,7 +43,7 @@ vec4 getColorAtPosition(vec2 position) {
     int type = operationTypes[i];
     
     if (type == TYPE_DROP) {   
-      vec2 c = operationPositions[i];
+      vec2 c = operationPositions[i].xy;
       float r = operationArgs[i].x;
       int colorIndex = int(operationArgs[i].y);
       
@@ -58,15 +59,19 @@ vec4 getColorAtPosition(vec2 position) {
     }
 
     else if (type == TYPE_LINE) {      
-      vec2 c = operationPositions[i];
-      vec2 m = normalize(operationArgs[i].xy - c);
-      float a = operationArgs[i].z;
+      vec2 c = operationPositions[i].xy;
+      vec2 m = normalize(operationPositions[i].zw - c);
+      float size = operationArgs[i].x;
 
       vec2 n = vec2(-m.y, m.x);
       vec2 d = p - c;
       float l = length(dot(d, n));
-      float l2 = (a * LAMBDA) / (l + LAMBDA);
+      float l2 = (size * ALPHA * LAMBDA) / (l + LAMBDA);
       p = p - (m * l2);
+    }
+
+    else if (type == TYPE_COMB) {
+
     }
 
     else {
