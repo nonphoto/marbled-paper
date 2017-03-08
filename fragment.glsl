@@ -16,7 +16,7 @@ uniform vec3 colors[MAX_COLORS];
 uniform int operationCount;
 uniform int operationTypes[MAX_PATTERNS];
 uniform vec2 operationPositions[MAX_PATTERNS];
-uniform vec2 operationArgs[MAX_PATTERNS];
+uniform vec3 operationArgs[MAX_PATTERNS];
 
 bool circleTest(vec2 p, vec2 c, float r) {
   return length(p - c) < r;
@@ -59,12 +59,13 @@ vec4 getColorAtPosition(vec2 position) {
 
     else if (type == TYPE_LINE) {      
       vec2 c = operationPositions[i];
-      vec2 m = normalize(operationArgs[i] - c);
+      vec2 m = normalize(operationArgs[i].xy - c);
+      float a = operationArgs[i].z;
 
       vec2 n = vec2(-m.y, m.x);
       vec2 d = p - c;
       float l = length(dot(d, n));
-      float l2 = (ALPHA * LAMBDA) / (l + LAMBDA);
+      float l2 = (a * LAMBDA) / (l + LAMBDA);
       p = p - (m * l2);
     }
 

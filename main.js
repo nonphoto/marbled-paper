@@ -5,14 +5,15 @@ const vertexPositions = [
 	1, 1, 0
 ]
 
-const minDropSize = 10
+const minDropSize = 50
 const maxDropSize = 100
+
+const lineSize = 150
 
 const viscosity = 10
 
-const colorCount = 8
+const colorCount = 7
 const colors = [
-  0.59, 0.05, 0.07,
   0.59, 0.05, 0.07,
   1.00, 0.96, 0.91,
   0.10, 0.22, 0.66,
@@ -42,7 +43,7 @@ class Drop {
   }
 
   args() {
-    return [this.size, this.color]
+    return [this.size, this.color, 0]
   }
 
   type() {
@@ -56,10 +57,12 @@ class Line {
     this.y1 = y1
     this.x2 = x2
     this.y2 = y2
+    this.size = 0
+    this.targetSize = lineSize
   }
 
   update() {
-
+    this.size += (this.targetSize - this.size) / viscosity
   }
 
   position() {
@@ -67,7 +70,7 @@ class Line {
   }
 
   args() {
-    return [this.x2, this.y2]
+    return [this.x2, this.y2, this.size]
   }
 
   type() {
@@ -170,7 +173,7 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
       gl.uniform1i(operationCountUniform, operations.length)
       gl.uniform1iv(operationTypesUniform, operationTypes)
       gl.uniform2fv(operationPositionsUniform, operationPositions)
-      gl.uniform2fv(operationArgsUniform, operationArgs)
+      gl.uniform3fv(operationArgsUniform, operationArgs)
 
       gl.enableVertexAttribArray(vertexPositionAttribute)
       gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0)
