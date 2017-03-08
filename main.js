@@ -96,7 +96,12 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
     const bounds = canvas.getBoundingClientRect()
     const x = e.clientX - bounds.left
     const y = -(e.clientY - bounds.bottom)
-    operations.unshift(new Drop(x, y))
+    if (Math.random() < 0.5) {
+      operations.unshift(new Drop(x, y))
+    }
+    else {
+      operations.unshift(new Line(x, y, x + 1, y + 1))
+    }
   })
 
 	let gl = null
@@ -147,7 +152,7 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
       gl.uniform2f(resolutionUniform, canvas.width, canvas.height)
       gl.uniform3fv(colorsUniform, colors)
       gl.uniform1i(operationCountUniform, operations.length)
-      gl.uniform1i(operationTypesUniform, operationTypes)
+      gl.uniform1iv(operationTypesUniform, operationTypes)
       gl.uniform2fv(operationPositionsUniform, operationPositions)
       gl.uniform2fv(operationArgsUniform, operationArgs)
 

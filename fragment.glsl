@@ -39,7 +39,7 @@ vec4 getColorAtPosition(vec2 position) {
 
     int type = operationTypes[i];
     
-    if (type == TYPE_DROP) {
+    if (type == TYPE_DROP) {   
       vec2 c = operationPositions[i];
       float r = operationArgs[i].x;
       int colorIndex = int(operationArgs[i].y);
@@ -55,7 +55,7 @@ vec4 getColorAtPosition(vec2 position) {
       }
     }
 
-    else if (type == TYPE_LINE) {
+    else if (type == TYPE_LINE) {      
       vec2 c = operationPositions[i];
       vec2 m = normalize(operationArgs[i] - c);
 
