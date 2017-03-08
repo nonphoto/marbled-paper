@@ -18,32 +18,12 @@ bool circleTest(vec2 p, vec2 c, float r) {
 }
 
 vec4 getColorAtIndex(int i) {
-  vec3 color = vec3(1, 0, 1);
-  if (i == 0) {
-    color = colors[0];
+  for (int j = 0; j < MAX_COLORS; j++) {
+    if (j == i) {
+      return vec4(colors[j], 1);
+    }
   }
-  else if (i == 1) {
-    color = colors[1];
-  }
-  else if (i == 2) {
-    color = colors[2];
-  }
-  else if (i == 3) {
-    color = colors[3];
-  }
-  else if (i == 4) {
-    color = colors[4];
-  }
-  else if (i == 5) {
-    color = colors[5];
-  }
-  else if (i == 6) {
-    color = colors[6];
-  }
-  else if (i == 7) {
-    color = colors[7];
-  }
-  return vec4(color, 1);
+  return vec4(1, 0, 1, 1);
 }
 
 vec4 getColorAtPosition(vec2 position) {
