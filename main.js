@@ -88,6 +88,12 @@ function loadShader(gl, source, type) {
 }
 
 require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vertexSource, fragmentSource) => {
+  const controls = document.getElementById('controls')
+  const buttons = Array.from(controls.getElementsByClassName('radio-button'))
+  const getCheckedControl = () => {
+    return buttons.find(button => button.checked === true).id
+  }
+  
   const canvas = document.getElementById('canvas')
   canvas.width = 800
   canvas.height = 600
@@ -96,11 +102,18 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
     const bounds = canvas.getBoundingClientRect()
     const x = e.clientX - bounds.left
     const y = -(e.clientY - bounds.bottom)
-    if (Math.random() < 0.5) {
-      operations.unshift(new Drop(x, y))
-    }
-    else {
-      operations.unshift(new Line(x, y, x + 1, y + 1))
+
+    switch (getCheckedControl()) {
+      case "pattern-drop":
+        operations.unshift(new Drop(x, y))
+        break;
+      case "pattern-line":
+        operations.unshift(new Line(x, y, x + 1, y + 1))
+        break;
+      case "pattern-comb":
+        operations.un
+      default:
+        break;
     }
   })
 

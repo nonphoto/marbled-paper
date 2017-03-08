@@ -15,7 +15,7 @@ body {
   height: 100vh;  
 }
 
-.controls {
+#controls {
   width: 100px;
   color: white;
   list-style-type: none;
