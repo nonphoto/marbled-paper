@@ -34,12 +34,41 @@ class Drop {
     this.size += (this.targetSize - this.size) / viscosity
   }
 
-  get position() {
+  position() {
     return [this.x, this.y]
   }
 
-  get args() {
+  args() {
     return [this.size, this.color]
+  }
+
+  type() {
+    return 0
+  }
+}
+
+class Line {
+  constructor(x1, y1, x2, y2) {
+    this.x1 = x1
+    this.y1 = y1
+    this.x2 = x2
+    this.y2 = y2
+  }
+
+  update() {
+
+  }
+
+  position() {
+    return [this.x1, this.y1]
+  }
+
+  args() {
+    return [this.x2, this.y2]
+  }
+
+  type() {
+    return 1
   }
 }
 
@@ -111,9 +140,9 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
     gl.clear(gl.COLOR_BUFFER_BIT)
     
     if (operations.length > 0) {
-      const operationTypes = operations.map(() => 0)
-      const operationPositions = operations.map(op => op.position).reduce((acc, val) => acc.concat(val))
-      const operationArgs = operations.map(op => op.args).reduce((acc, val) => acc.concat(val))
+      const operationTypes = operations.map(op => op.type())
+      const operationPositions = operations.map(op => op.position()).reduce((acc, val) => acc.concat(val))
+      const operationArgs = operations.map(op => op.args()).reduce((acc, val) => acc.concat(val))
 
       gl.uniform2f(resolutionUniform, canvas.width, canvas.height)
       gl.uniform3fv(colorsUniform, colors)
