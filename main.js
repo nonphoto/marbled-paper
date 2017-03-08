@@ -10,26 +10,36 @@ const maxDropSize = 100
 
 const viscosity = 10
 
+const colorCount = 5
 const colors = [
-  [1.00, 0.96, 0.91],
-  [0.59, 0.05, 0.07],
-  [0.10, 0.22, 0.66],
-  [0.05, 0.13, 0.31],
-  [0.89, 0.75, 0.33]
+  1.00, 0.96, 0.91,
+  0.59, 0.05, 0.07,
+  0.10, 0.22, 0.66,
+  0.05, 0.13, 0.31,
+  0.89, 0.75, 0.33
 ]
 
-let drops = []
+let operations = []
 
 class Drop {
   constructor(x, y) {
-    this.position = [x, y]
+    this.x = x
+    this.y = y
     this.size = 0
     this.targetSize = minDropSize + (Math.random() * (maxDropSize - minDropSize))
-    this.color = colors[Math.floor(Math.random() * colors.length)]
+    this.color = Math.floor(Math.random() * colorCount)
   }
 
   update() {
     this.size += (this.targetSize - this.size) / viscosity
+  }
+
+  get position() {
+    return [this.x, this.y]
+  }
+
+  get args() {
+    return [this.size, this.color]
   }
 }
 
@@ -57,7 +67,7 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
     const bounds = canvas.getBoundingClientRect()
     const x = e.clientX - bounds.left
     const y = -(e.clientY - bounds.bottom)
-    drops.unshift(new Drop(x, y))
+    operations.unshift(new Drop(x, y))
   })
 
 	let gl = null
@@ -85,12 +95,13 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
 	gl.useProgram(program)
 	gl.clearColor(1.0, 1.0, 1.0, 1.0)
 
-	const vertexPositionAttribute = gl.getAttribLocation(program, 'vertexPosition')
+  const vertexPositionAttribute = gl.getAttribLocation(program, 'vertexPosition')
   const resolutionUniform = gl.getUniformLocation(program, 'resolution')
-  const dropCountUniform = gl.getUniformLocation (program, 'dropCount')
-  const dropPositionsUniform = gl.getUniformLocation(program, 'dropPositions')
-  const dropSizesUniform = gl.getUniformLocation(program, 'dropSizes')
-  const dropColorsUniform = gl.getUniformLocation(program, 'dropColors')
+  const colorsUniform = gl.getUniformLocation(program, 'colors')
+  const operationCountUniform = gl.getUniformLocation(program, 'operationCount')
+  const operationTypesUniform = gl.getUniformLocation(program, 'operationTypes')
+  const operationPositionsUniform = gl.getUniformLocation(program, 'operationPositions')
+  const operationArgsUniform = gl.getUniformLocation(program, 'operationArgs')
 
 	const vertexPositionBuffer = gl.createBuffer()
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer)
@@ -99,23 +110,24 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
 	function draw() {
     gl.clear(gl.COLOR_BUFFER_BIT)
     
-    if (drops.length > 0) {
-      const dropPositions = drops.map(drop => drop.position).reduce((positions, position) => positions.concat(position))
-      const dropSizes = drops.map(drop => drop.size)
-      const dropColors = drops.map(drop => drop.color).reduce((colors, color) => colors.concat(color))
+    if (operations.length > 0) {
+      const operationTypes = operations.map(() => 0)
+      const operationPositions = operations.map(op => op.position).reduce((acc, val) => acc.concat(val))
+      const operationArgs = operations.map(op => op.args).reduce((acc, val) => acc.concat(val))
 
       gl.uniform2f(resolutionUniform, canvas.width, canvas.height)
-      gl.uniform1i(dropCountUniform, drops.length)
-      gl.uniform2fv(dropPositionsUniform, dropPositions)
-      gl.uniform1fv(dropSizesUniform, dropSizes)
-      gl.uniform3fv(dropColorsUniform, dropColors)
+      gl.uniform3fv(colorsUniform, colors)
+      gl.uniform1i(operationCountUniform, operations.length)
+      gl.uniform1i(operationTypesUniform, operationTypes)
+      gl.uniform2fv(operationPositionsUniform, operationPositions)
+      gl.uniform2fv(operationArgsUniform, operationArgs)
 
       gl.enableVertexAttribArray(vertexPositionAttribute)
       gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0)
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
-      drops[0].update()
+      operations[0].update()
     }  
 
 		requestAnimationFrame(draw)
