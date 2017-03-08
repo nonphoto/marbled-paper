@@ -10,11 +10,14 @@ const maxDropSize = 100
 
 const viscosity = 10
 
-const colorCount = 5
+const colorCount = 8
 const colors = [
-  1.00, 0.96, 0.91,
   0.59, 0.05, 0.07,
+  0.59, 0.05, 0.07,
+  1.00, 0.96, 0.91,
   0.10, 0.22, 0.66,
+  0.10, 0.22, 0.66,
+  0.05, 0.13, 0.31,
   0.05, 0.13, 0.31,
   0.89, 0.75, 0.33
 ]
@@ -140,7 +143,7 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
 	}
 
 	gl.useProgram(program)
-	gl.clearColor(1.0, 1.0, 1.0, 1.0)
+	gl.clearColor(0.1, 0.1, 0.1, 0.1)
 
   const vertexPositionAttribute = gl.getAttribLocation(program, 'vertexPosition')
   const resolutionUniform = gl.getUniformLocation(program, 'resolution')

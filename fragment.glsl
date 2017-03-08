@@ -71,7 +71,7 @@ vec4 getColorAtPosition(vec2 position) {
     }
   }
 
-  return vec4(0.5, 0.5, 0.5, 1);
+  return getColorAtIndex(0);
 }
 
 void main() {
