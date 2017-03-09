@@ -62,6 +62,13 @@ function loadShader(gl, source, type) {
 	return shader;
 }
 
+function getPositionInCanvas(canvas, x, y) {
+  const bounds = canvas.getBoundingClientRect()
+  const nx = x - bounds.left
+  const ny = -(y - bounds.bottom)
+  return [nx, ny]
+}
+
 require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vertexSource, fragmentSource) => {
   const controls = document.getElementById('controls')
   const buttons = Array.from(controls.getElementsByClassName('radio-button'))
@@ -103,16 +110,13 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
     if (isDragging) {
       isDragging = false
 
-      const bounds = canvas.getBoundingClientRect()
-      const x1 = startX - bounds.left
-      const y1 = -(startY - bounds.bottom)
-      const x2 = e.clientX - bounds.left
-      const y2 = -(e.clientY - bounds.bottom)
+      const p1 = getPositionInCanvas(canvas, startX, startY)
+      const p2 = getPositionInCanvas(canvas, e.clientX, e.clientY)
 
       const color = Math.floor(Math.random() * colorCount)
       const type = types[getCheckedControl().id]
   
-      const operation = new Operation([x1, y1], [x2, y2], color, type)
+      const operation = new Operation(p1, p2, color, type)
       operations.unshift(operation)
       lastOperationScale = 0
 
