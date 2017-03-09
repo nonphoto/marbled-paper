@@ -76,7 +76,7 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
     return buttons.find(button => button.checked === true)
   }
 
-  const cursorDrop = document.getElementById('cursor-drop')
+  const cursor = document.getElementById('cursor')
   
   const canvas = document.getElementById('canvas')
   canvas.width = 800
@@ -91,18 +91,18 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
     startY = e.clientY
     isDragging = true
 
-    cursorDrop.style.opacity = 0.5;
-    cursorDrop.style.transform = `translate(${startX}px, ${startY}px) scale(${1})`
+    cursor.style.opacity = 0.5;
+    cursor.style.transform = `translate(${startX}px, ${startY}px) scale(${1})`
   })
 
   document.addEventListener('mousemove', (e) => {
     if (isDragging) {
       const dx = e.clientX - startX
       const dy = e.clientY - startY
-      const scale = Math.sqrt((dx * dx) + (dy * dy))
+      const scale = Math.sqrt((dx * dx) + (dy * dy)) * 2
       const strokeWidth = 1 / scale
-      cursorDrop.style.transform = `translate(${startX}px, ${startY}px) scale(${scale})`
-      cursorDrop.style['stroke-width'] = `${strokeWidth}px`
+      cursor.style.transform = `translate(${startX}px, ${startY}px) scale(${scale})`
+      cursor.style['stroke-width'] = `${strokeWidth}px`
     }
   })
 
@@ -122,7 +122,7 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
 
     }  
 
-    cursorDrop.style.opacity = 0;
+    cursor.style.opacity = 0;
   })
 
 	let gl = null
