@@ -3,6 +3,10 @@ html {
 }
 
 body {
+  margin: 0;
+}
+
+.content {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -41,4 +45,15 @@ body {
 
 .control input:checked + label {
   opacity: 1;
+}
+
+svg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  fill: none;
+  stroke: white;
+  stroke-width: 1px;
+  opacity: 0;
+  pointer-events: none;
 }

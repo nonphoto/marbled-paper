@@ -6,7 +6,7 @@ const vertexPositions = [
 ]
 
 const minSize = 50
-const viscosity = 6
+const viscosity = 10
 
 const colorCount = 7
 const colors = [
@@ -68,6 +68,8 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
   const getCheckedControl = () => {
     return buttons.find(button => button.checked === true)
   }
+
+  const cursorDrop = document.getElementById('cursor-drop')
   
   const canvas = document.getElementById('canvas')
   canvas.width = 800
@@ -78,11 +80,22 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
   let isDragging = false
 
   canvas.addEventListener('mousedown', (e) => {
-    const bounds = canvas.getBoundingClientRect()
-    const x1 = e.clientX - bounds.left
-    const y1 = -(e.clientY - bounds.bottom)
-    dragStart = [x1, y1]
+    dragStart = [e.clientX, e.clientY]
     isDragging = true
+
+    cursorDrop.style.opacity = 0.5;
+    cursorDrop.style.transform = `translate(${e.clientX}px, ${e.clientY}px) scale(${1})`
+  })
+
+  document.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+      const dx = e.clientX - dragStart[0]
+      const dy = e.clientY - dragStart[1]
+      const scale = Math.sqrt((dx * dx) + (dy * dy))
+      const strokeWidth = 1 / scale
+      cursorDrop.style.transform = `translate(${dragStart[0]}px, ${dragStart[1]}px) scale(${scale})`
+      cursorDrop.style['stroke-width'] = `${strokeWidth}px`
+    }
   })
 
   document.addEventListener('mouseup', (e) => {
@@ -90,17 +103,21 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
       isDragging = false
 
       const bounds = canvas.getBoundingClientRect()
+      const x1 = dragStart[0] - bounds.left
+      const y1 = -(dragStart[1] - bounds.bottom)
       const x2 = e.clientX - bounds.left
       const y2 = -(e.clientY - bounds.bottom)
-      dragEnd = [x2, y2]
 
       const color = Math.floor(Math.random() * colorCount)
       const type = types[getCheckedControl().id]
   
-      const operation = new Operation(dragStart, dragEnd, color, type)
+      const operation = new Operation([x1, y1], [x2, y2], color, type)
       operations.unshift(operation)
       lastOperationScale = 0
+
     }  
+
+    cursorDrop.style.opacity = 0;
   })
 
 	let gl = null
