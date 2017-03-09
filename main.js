@@ -75,25 +75,26 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
   canvas.width = 800
   canvas.height = 600
 
-  let dragStart = [0, 0]
-  let dragEnd = [0, 0]
+  let startX = 0
+  let startY = 0
   let isDragging = false
 
   canvas.addEventListener('mousedown', (e) => {
-    dragStart = [e.clientX, e.clientY]
+    startX = e.clientX
+    startY = e.clientY
     isDragging = true
 
     cursorDrop.style.opacity = 0.5;
-    cursorDrop.style.transform = `translate(${e.clientX}px, ${e.clientY}px) scale(${1})`
+    cursorDrop.style.transform = `translate(${startX}px, ${startY}px) scale(${1})`
   })
 
   document.addEventListener('mousemove', (e) => {
     if (isDragging) {
-      const dx = e.clientX - dragStart[0]
-      const dy = e.clientY - dragStart[1]
+      const dx = e.clientX - startX
+      const dy = e.clientY - startY
       const scale = Math.sqrt((dx * dx) + (dy * dy))
       const strokeWidth = 1 / scale
-      cursorDrop.style.transform = `translate(${dragStart[0]}px, ${dragStart[1]}px) scale(${scale})`
+      cursorDrop.style.transform = `translate(${startX}px, ${startY}px) scale(${scale})`
       cursorDrop.style['stroke-width'] = `${strokeWidth}px`
     }
   })
@@ -103,8 +104,8 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
       isDragging = false
 
       const bounds = canvas.getBoundingClientRect()
-      const x1 = dragStart[0] - bounds.left
-      const y1 = -(dragStart[1] - bounds.bottom)
+      const x1 = startX - bounds.left
+      const y1 = -(startY - bounds.bottom)
       const x2 = e.clientX - bounds.left
       const y2 = -(e.clientY - bounds.bottom)
 
