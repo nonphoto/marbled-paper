@@ -1,6 +1,6 @@
 precision mediump float;
 
-const bool ANTIALIASING = true;
+const int ANTIALIASING_THRESHOLD = 1000000;
 
 const float ALPHA = 150.0;
 const float LAMBDA = 8.0;
@@ -11,6 +11,8 @@ const int TYPE_COMB = 2;
 
 const int MAX_COLORS = 8;
 const int MAX_PATTERNS = 128;
+
+uniform vec2 resolution;
 
 uniform vec3 colors[MAX_COLORS];
 
@@ -95,7 +97,7 @@ vec4 getColorAtPosition(vec2 position) {
 }
 
 void main() {
-  if (ANTIALIASING) {
+  if (int(resolution.x * resolution.y) < ANTIALIASING_THRESHOLD) {
     vec2 p = gl_FragCoord.xy;
     vec2 p1 = vec2(0.125, 0.375);
     vec2 p2 = vec2(-0.375, 0.125);
