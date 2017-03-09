@@ -3,7 +3,7 @@ precision mediump float;
 const bool ANTIALIASING = true;
 
 const float ALPHA = 150.0;
-const float LAMBDA = 8.0;
+const float LAMBDA = 4.0;
 
 const int TYPE_DROP = 0;
 const int TYPE_LINE = 1;
@@ -73,9 +73,10 @@ vec4 getColorAtPosition(vec2 position) {
       vec2 n = vec2(-m.y, m.x);
       vec2 d = p - a;
       float l = length(dot(d, n));
-      float l2 = s - abs(mod(l, s * 2.0) - s);
-      float l3 = (ALPHA * LAMBDA) / (l2 + LAMBDA);
-      p = p - (m * l3);
+      float l2 = abs(mod(l, s * 2.0) - s);
+      float l3 = (ALPHA * LAMBDA) / (s - l2 + LAMBDA);
+      float l4 = l3 * (l2 / s) * (l2 / s) ;
+      p = p - (m * l4);
     }
 
     else {
