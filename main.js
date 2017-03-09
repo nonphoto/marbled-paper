@@ -78,6 +78,33 @@ class Line {
   }
 }
 
+class Comb {
+    constructor(x1, y1, x2, y2) {
+    this.x1 = x1
+    this.y1 = y1
+    this.x2 = x2
+    this.y2 = y2
+    this.size = 0
+    this.targetSize = 1
+  }
+
+  update() {
+    this.size += (this.targetSize - this.size) / viscosity
+  }
+
+  position() {
+    return [this.x1, this.y1, this.x2, this.y2]
+  }
+
+  args() {
+    return [this.size, 0]
+  }
+
+  type() {
+    return 2
+  }
+}
+
 function loadShader(gl, source, type) {
 	const shader = gl.createShader(type);
 	gl.shaderSource(shader, source);
@@ -117,6 +144,8 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
         operations.unshift(new Line(x, y, x + 1, y + 1))
         break;
       case "pattern-comb":
+        operations.unshift(new Comb(x, y, x - 1, y + 1))
+        break;
       default:
         break;
     }

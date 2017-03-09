@@ -71,7 +71,17 @@ vec4 getColorAtPosition(vec2 position) {
     }
 
     else if (type == TYPE_COMB) {
+      vec2 c = operationPositions[i].xy;
+      vec2 m = normalize(operationPositions[i].zw - c);
+      float size = operationArgs[i].x;
+      float s = 25.0;
 
+      vec2 n = vec2(-m.y, m.x);
+      vec2 d = p - c;
+      float l = length(dot(d, n));
+      float l2 = s - abs(mod(l, s * 2.0) - s);
+      float l3 = (size * ALPHA * LAMBDA) / (l2 + LAMBDA);
+      p = p - (m * l3);
     }
 
     else {
