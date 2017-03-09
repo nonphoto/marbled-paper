@@ -74,12 +74,13 @@ vec4 getColorAtPosition(vec2 position) {
     }
 
     else if (type == TYPE_COMB) {
-      float s = 50.0;
       vec2 m = normalize(b - a);
       vec2 n = vec2(-m.y, m.x);
       vec2 d = p - a;
+      float s2 = length(b - a);
+      float s = s2 / 2.0;
       float l = length(dot(d, n));
-      float l2 = abs(mod(l, s * 2.0) - s);
+      float l2 = abs(mod(l, s2) - s);
       float l3 = (ALPHA * LAMBDA) / (s - l2 + LAMBDA);
       float l4 = l3 * (l2 / s) * (l2 / s) ;
       p = p - (m * l4 * scale);

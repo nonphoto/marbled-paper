@@ -5,6 +5,7 @@ const vertexPositions = [
 	1, 1, 0
 ]
 
+const minSize = 50
 const viscosity = 6
 
 const colorCount = 7
@@ -17,6 +18,12 @@ const colors = [
   0.05, 0.13, 0.31,
   0.89, 0.75, 0.33
 ]
+
+// const colors = [
+//   1, 1, 1,
+//   0.69, 0.05, 0.67,
+//   0.00, 0.76, 0.79
+// ]
 
 const types = {
   "pattern-drop": 0,
@@ -66,17 +73,34 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
   canvas.width = 800
   canvas.height = 600
 
-  canvas.addEventListener('click', (e) => {
+  let dragStart = [0, 0]
+  let dragEnd = [0, 0]
+  let isDragging = false
+
+  canvas.addEventListener('mousedown', (e) => {
     const bounds = canvas.getBoundingClientRect()
     const x1 = e.clientX - bounds.left
     const y1 = -(e.clientY - bounds.bottom)
-    const x2 = x1 + 50;
-    const y2 = y1 + 50;
-    const color = Math.floor(Math.random() * colorCount)
-    const type = types[getCheckedControl().id]
-    const operation = new Operation([x1, y1], [x2, y2], color, type)
-    operations.unshift(operation)
-    lastOperationScale = 0
+    dragStart = [x1, y1]
+    isDragging = true
+  })
+
+  document.addEventListener('mouseup', (e) => {
+    if (isDragging) {
+      isDragging = false
+
+      const bounds = canvas.getBoundingClientRect()
+      const x2 = e.clientX - bounds.left
+      const y2 = -(e.clientY - bounds.bottom)
+      dragEnd = [x2, y2]
+
+      const color = Math.floor(Math.random() * colorCount)
+      const type = types[getCheckedControl().id]
+  
+      const operation = new Operation(dragStart, dragEnd, color, type)
+      operations.unshift(operation)
+      lastOperationScale = 0
+    }  
   })
 
 	let gl = null
