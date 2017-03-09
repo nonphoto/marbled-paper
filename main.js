@@ -5,11 +5,6 @@ const vertexPositions = [
 	1, 1, 0
 ]
 
-const minDropSize = 50
-const maxDropSize = 100
-
-const lineSize = 150
-
 const viscosity = 10
 
 const colorCount = 7
@@ -23,40 +18,20 @@ const colors = [
   0.89, 0.75, 0.33
 ]
 
+const types = {
+  "pattern-drop": 0,
+  "pattern-line": 1,
+  "pattern-comb": 2
+}
+
 let operations = []
 
-class Drop {
-  constructor(x, y) {
-    this.x = x
-    this.y = y
-    this.size = 0
-    this.targetSize = minDropSize + (Math.random() * (maxDropSize - minDropSize))
-    this.color = Math.floor(Math.random() * colorCount)
-  }
-
-  update() {
-    this.size += (this.targetSize - this.size) / viscosity
-  }
-
-  position() {
-    return [this.x, this.y, 0, 0]
-  }
-
-  args() {
-    return [this.size, this.color]
-  }
-
-  type() {
-    return 0
-  }
-}
-
-class Line {
-  constructor(x1, y1, x2, y2) {
-    this.x1 = x1
-    this.y1 = y1
-    this.x2 = x2
-    this.y2 = y2
+class Operation {
+  constructor(p1, p2, color, type) {
+    this.p1 = p1
+    this.p2 = p2
+    this.color = color
+    this.type = type
     this.size = 0
     this.targetSize = 1
   }
@@ -65,43 +40,8 @@ class Line {
     this.size += (this.targetSize - this.size) / viscosity
   }
 
-  position() {
-    return [this.x1, this.y1, this.x2, this.y2]
-  }
-
-  args() {
-    return [this.size, 0]
-  }
-
-  type() {
-    return 1
-  }
-}
-
-class Comb {
-    constructor(x1, y1, x2, y2) {
-    this.x1 = x1
-    this.y1 = y1
-    this.x2 = x2
-    this.y2 = y2
-    this.size = 0
-    this.targetSize = 1
-  }
-
-  update() {
-    this.size += (this.targetSize - this.size) / viscosity
-  }
-
-  position() {
-    return [this.x1, this.y1, this.x2, this.y2]
-  }
-
-  args() {
-    return [this.size, 0]
-  }
-
-  type() {
-    return 2
+  coordinates() {
+    return this.p1.concat(this.p2)
   }
 }
 
@@ -124,7 +64,7 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
   const controls = document.getElementById('controls')
   const buttons = Array.from(controls.getElementsByClassName('radio-button'))
   const getCheckedControl = () => {
-    return buttons.find(button => button.checked === true).id
+    return buttons.find(button => button.checked === true)
   }
   
   const canvas = document.getElementById('canvas')
@@ -133,22 +73,14 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
 
   canvas.addEventListener('click', (e) => {
     const bounds = canvas.getBoundingClientRect()
-    const x = e.clientX - bounds.left
-    const y = -(e.clientY - bounds.bottom)
-
-    switch (getCheckedControl()) {
-      case "pattern-drop":
-        operations.unshift(new Drop(x, y))
-        break;
-      case "pattern-line":
-        operations.unshift(new Line(x, y, x + 1, y + 1))
-        break;
-      case "pattern-comb":
-        operations.unshift(new Comb(x, y, x - 1, y + 1))
-        break;
-      default:
-        break;
-    }
+    const x1 = e.clientX - bounds.left
+    const y1 = -(e.clientY - bounds.bottom)
+    const x2 = x1 + 25;
+    const y2 = y1 + 25;
+    const color = Math.floor(Math.random() * colorCount)
+    const type = types[getCheckedControl().id]
+    const operation = new Operation([x1, y1], [x2, y2], color, type)
+    operations.unshift(operation)
   })
 
 	let gl = null
@@ -181,8 +113,8 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
   const colorsUniform = gl.getUniformLocation(program, 'colors')
   const operationCountUniform = gl.getUniformLocation(program, 'operationCount')
   const operationTypesUniform = gl.getUniformLocation(program, 'operationTypes')
-  const operationPositionsUniform = gl.getUniformLocation(program, 'operationPositions')
-  const operationArgsUniform = gl.getUniformLocation(program, 'operationArgs')
+  const operationCoordinatesUniform = gl.getUniformLocation(program, 'operationCoordinates')
+  const operationColorsUniform = gl.getUniformLocation(program, 'operationColors')
 
 	const vertexPositionBuffer = gl.createBuffer()
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer)
@@ -192,16 +124,16 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
     gl.clear(gl.COLOR_BUFFER_BIT)
     
     if (operations.length > 0) {
-      const operationTypes = operations.map(op => op.type())
-      const operationPositions = operations.map(op => op.position()).reduce((acc, val) => acc.concat(val))
-      const operationArgs = operations.map(op => op.args()).reduce((acc, val) => acc.concat(val))
+      const operationTypes = operations.map(op => op.type)
+      const operationColors = operations.map(op => op.color)
+      const operationCoordinates = operations.map(op => op.coordinates()).reduce((acc, val) => acc.concat(val))
 
       gl.uniform2f(resolutionUniform, canvas.width, canvas.height)
       gl.uniform3fv(colorsUniform, colors)
       gl.uniform1i(operationCountUniform, operations.length)
       gl.uniform1iv(operationTypesUniform, operationTypes)
-      gl.uniform4fv(operationPositionsUniform, operationPositions)
-      gl.uniform2fv(operationArgsUniform, operationArgs)
+      gl.uniform1iv(operationColorsUniform, operationColors)
+      gl.uniform4fv(operationCoordinatesUniform, operationCoordinates)
 
       gl.enableVertexAttribArray(vertexPositionAttribute)
       gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0)

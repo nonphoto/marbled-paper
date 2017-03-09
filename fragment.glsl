@@ -16,8 +16,8 @@ uniform vec3 colors[MAX_COLORS];
 
 uniform int operationCount;
 uniform int operationTypes[MAX_PATTERNS];
-uniform vec4 operationPositions[MAX_PATTERNS];
-uniform vec2 operationArgs[MAX_PATTERNS];
+uniform int operationColors[MAX_PATTERNS];
+uniform vec4 operationCoordinates[MAX_PATTERNS];
 
 bool circleTest(vec2 p, vec2 c, float r) {
   return length(p - c) < r;
@@ -41,46 +41,40 @@ vec4 getColorAtPosition(vec2 position) {
     }
 
     int type = operationTypes[i];
+    int colorIndex = operationColors[i];
+    vec2 a = operationCoordinates[i].xy;
+    vec2 b = operationCoordinates[i].zw;
+    float r = length(b - a);
     
     if (type == TYPE_DROP) {   
-      vec2 c = operationPositions[i].xy;
-      float r = operationArgs[i].x;
-      int colorIndex = int(operationArgs[i].y);
-      
-      vec2 d = p - c;
+      vec2 d = p - a;
       float l = length(d);
       if (l - r < 0.0) {
         return getColorAtIndex(colorIndex);
       }
       else {
         float l2 = sqrt((l * l) - (r * r));
-        p = c + (d / l) * l2;
+        p = a + (d / l) * l2;
       }
     }
 
-    else if (type == TYPE_LINE) {      
-      vec2 c = operationPositions[i].xy;
-      vec2 m = normalize(operationPositions[i].zw - c);
-      float size = operationArgs[i].x;
-
+    else if (type == TYPE_LINE) {
+      vec2 m = normalize(b - a);
       vec2 n = vec2(-m.y, m.x);
-      vec2 d = p - c;
+      vec2 d = p - a;
       float l = length(dot(d, n));
-      float l2 = (size * ALPHA * LAMBDA) / (l + LAMBDA);
+      float l2 = (ALPHA * LAMBDA) / (l + LAMBDA);
       p = p - (m * l2);
     }
 
     else if (type == TYPE_COMB) {
-      vec2 c = operationPositions[i].xy;
-      vec2 m = normalize(operationPositions[i].zw - c);
-      float size = operationArgs[i].x;
-      float s = 25.0;
-
+      float s = 50.0;
+      vec2 m = normalize(b - a);
       vec2 n = vec2(-m.y, m.x);
-      vec2 d = p - c;
+      vec2 d = p - a;
       float l = length(dot(d, n));
       float l2 = s - abs(mod(l, s * 2.0) - s);
-      float l3 = (size * ALPHA * LAMBDA) / (l2 + LAMBDA);
+      float l3 = (ALPHA * LAMBDA) / (l2 + LAMBDA);
       p = p - (m * l3);
     }
 
