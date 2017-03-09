@@ -5,7 +5,7 @@ const vertexPositions = [
 	1, 1, 0
 ]
 
-const viscosity = 10
+const viscosity = 6
 
 const colorCount = 7
 const colors = [
@@ -25,6 +25,7 @@ const types = {
 }
 
 let operations = []
+let lastOperationScale = 0;
 
 class Operation {
   constructor(p1, p2, color, type) {
@@ -32,12 +33,6 @@ class Operation {
     this.p2 = p2
     this.color = color
     this.type = type
-    this.size = 0
-    this.targetSize = 1
-  }
-
-  update() {
-    this.size += (this.targetSize - this.size) / viscosity
   }
 
   coordinates() {
@@ -75,12 +70,13 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
     const bounds = canvas.getBoundingClientRect()
     const x1 = e.clientX - bounds.left
     const y1 = -(e.clientY - bounds.bottom)
-    const x2 = x1 + 25;
-    const y2 = y1 + 25;
+    const x2 = x1 + 50;
+    const y2 = y1 + 50;
     const color = Math.floor(Math.random() * colorCount)
     const type = types[getCheckedControl().id]
     const operation = new Operation([x1, y1], [x2, y2], color, type)
     operations.unshift(operation)
+    lastOperationScale = 0
   })
 
 	let gl = null
@@ -113,8 +109,9 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
   const colorsUniform = gl.getUniformLocation(program, 'colors')
   const operationCountUniform = gl.getUniformLocation(program, 'operationCount')
   const operationTypesUniform = gl.getUniformLocation(program, 'operationTypes')
-  const operationCoordinatesUniform = gl.getUniformLocation(program, 'operationCoordinates')
   const operationColorsUniform = gl.getUniformLocation(program, 'operationColors')
+  const operationCoordinatesUniform = gl.getUniformLocation(program, 'operationCoordinates')
+  const lastOperationScaleUniform = gl.getUniformLocation(program, 'lastOperationScale')
 
 	const vertexPositionBuffer = gl.createBuffer()
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer)
@@ -134,13 +131,14 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
       gl.uniform1iv(operationTypesUniform, operationTypes)
       gl.uniform1iv(operationColorsUniform, operationColors)
       gl.uniform4fv(operationCoordinatesUniform, operationCoordinates)
+      gl.uniform1f(lastOperationScaleUniform, lastOperationScale)
 
       gl.enableVertexAttribArray(vertexPositionAttribute)
       gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0)
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
-      operations[0].update()
+      lastOperationScale += (1 - lastOperationScale) / viscosity
     }  
 
 		requestAnimationFrame(draw)
