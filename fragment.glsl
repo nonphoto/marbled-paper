@@ -16,6 +16,7 @@ const int MAX_PATTERNS = 256;
 uniform vec2 resolution;
 
 uniform vec3 colors[MAX_COLORS];
+uniform vec3 backgroundColor;
 
 uniform int operationCount;
 uniform int operationTypes[MAX_PATTERNS];
@@ -106,7 +107,7 @@ vec4 getColorAtPosition(vec2 position) {
     }
   }
 
-  return getColorAtIndex(0);
+  return vec4(backgroundColor, 1);
 }
 
 void main() {
