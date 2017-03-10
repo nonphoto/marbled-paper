@@ -9,7 +9,14 @@ const minSize = 50
 const viscosity = 10
 const colorCount = 4
 
-const backgroundColor = [0.59, 0.05, 0.07]
+const backgroundColors = {
+  "palette-1": [0.59, 0.05, 0.07],
+  "palette-2": [1.00, 1.00, 1.00],
+  "palette-3": [0.59, 0.05, 0.07],
+  "palette-4": [0.59, 0.05, 0.07],
+  "palette-5": [0.59, 0.05, 0.07],
+}
+
 const colors = {
   "palette-1": [
     1.00, 0.96, 0.91,
@@ -211,7 +218,7 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
   }
 
   gl.useProgram(program)
-  gl.clearColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], 1)
+  gl.clearColor(0.1, 0.1, 0.1, 1)
 
   const vertexPositionAttribute = gl.getAttribLocation(program, 'vertexPosition')
   const resolutionUniform = gl.getUniformLocation(program, 'resolution')
@@ -234,11 +241,14 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
       const operationTypes = operations.map(op => op.type)
       const operationColors = operations.map(op => op.color)
       const operationCoordinates = operations.map(op => op.coordinates()).reduce((acc, val) => acc.concat(val))
-      const selectedColors = colors[getSelectedButtonId(paletteButtons)]
+
+      const selectedButtonId = getSelectedButtonId(paletteButtons)
+      const selectedBackground = backgroundColors[selectedButtonId]
+      const selectedColors = colors[selectedButtonId]
 
       gl.uniform2f(resolutionUniform, canvas.width, canvas.height)
       gl.uniform3fv(colorsUniform, selectedColors)
-      gl.uniform3f(backgroundColorUniform, backgroundColor[0], backgroundColor[1], backgroundColor[2])
+      gl.uniform3f(backgroundColorUniform, selectedBackground[0], selectedBackground[1], selectedBackground[2])
       gl.uniform1i(operationCountUniform, operations.length)
       gl.uniform1iv(operationTypesUniform, operationTypes)
       gl.uniform1iv(operationColorsUniform, operationColors)
