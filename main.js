@@ -57,6 +57,10 @@ function loadShader(gl, source, type) {
 	return shader;
 }
 
+function length(x, y) {
+    return Math.sqrt((x * x) + (y * y)) 
+}
+
 function getPositionInCanvas(canvas, x, y) {
   const bounds = canvas.getBoundingClientRect()
   const nx = x - bounds.left
@@ -108,7 +112,7 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
 
     const dx = e.clientX - startX
     const dy = e.clientY - startY
-    const scale = Math.sqrt((dx * dx) + (dy * dy)) * 2
+    const scale = length(dx, dy) * 2
     const strokeWidth = 2 / scale
     const angle = Math.atan2(dx, -dy)
 
@@ -121,16 +125,39 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
 
     if (!isDragging) { return }
     isDragging = false
-
-    const p1 = getPositionInCanvas(canvas, startX, startY)
-    const p2 = getPositionInCanvas(canvas, e.clientX, e.clientY)
-
-    const color = Math.floor(Math.random() * colorCount)
-    const type = types[getCheckedControl().id]
-
-    const operation = new Operation(p1, p2, color, type)
-    operations.unshift(operation)
     lastOperationScale = 0
+
+    if (getCheckedControl().id === "pattern-spray") {
+      const dx = e.clientX - startX
+      const dy = e.clientY - startY
+      const l = length(dx, dy)
+      const canvasArea = canvas.offsetWidth * canvas.offsetHeight
+      const dropCount = Math.min(Math.floor(canvasArea / l), 25);
+      const dropRadius = l / 10
+      const dropColor = Math.floor(Math.random() * colorCount)
+
+      for (i = 0; i < dropCount; i++) {
+        const x = Math.random() * canvas.offsetWidth
+        const y = Math.random() * canvas.offsetHeight
+
+        const p1 = [x, y]
+        const p2 = [x, y + dropRadius]
+        const type = types["pattern-drop"]
+        
+        const operation = new Operation(p1, p2, dropColor, type)
+        operations.unshift(operation)
+      }
+    }
+    else {
+      const p1 = getPositionInCanvas(canvas, startX, startY)
+      const p2 = getPositionInCanvas(canvas, e.clientX, e.clientY)
+
+      const color = Math.floor(Math.random() * colorCount)
+      const type = types[getCheckedControl().id]
+
+      const operation = new Operation(p1, p2, color, type)
+      operations.unshift(operation)
+    }  
   })
 
 	let gl = null

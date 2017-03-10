@@ -17,6 +17,10 @@
 				<label for="pattern-drop">Drop</label>
 			</li>
 			<li class="control">
+				<input class="radio-button" type="radio" name="pattern" id="pattern-spray" checked>
+				<label for="pattern-spray">Spray</label>
+			</li>
+			<li class="control">
 				<input class="radio-button" type="radio" name="pattern" id="pattern-line">
 				<label for="pattern-line">Line</label>
 			</li>
@@ -34,6 +38,12 @@
 		<div id="cursor">
 			<svg data-pattern="pattern-drop" viewBox="0 0 1 1">
 				<circle cx="0.5" cy="0.5" r="0.49"/>
+			</svg>
+			<svg data-pattern="pattern-spray" viewBox="0 0 1 1">
+				<circle cx="0.1" cy="0.1" r="0.1"/>				
+				<circle cx="0.1" cy="0.9" r="0.1"/>				
+				<circle cx="0.9" cy="0.1" r="0.1"/>				
+				<circle cx="0.9" cy="0.9" r="0.1"/>								
 			</svg>
 			<svg data-pattern="pattern-line" viewBox="0 0 1 1">
 				<line x1="0.5" y1="0.5" x2="0.5" y2="0.0"/>
