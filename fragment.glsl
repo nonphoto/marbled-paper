@@ -8,6 +8,7 @@ const float LAMBDA = 8.0;
 const int TYPE_DROP = 0;
 const int TYPE_LINE = 1;
 const int TYPE_COMB = 2;
+const int TYPE_SMUDGE = 3;
 
 const int MAX_COLORS = 8;
 const int MAX_PATTERNS = 128;
@@ -85,6 +86,18 @@ vec4 getColorAtPosition(vec2 position) {
       float l2 = abs(mod(l, s2) - s);
       float l3 = (ALPHA * LAMBDA) / (s - l2 + LAMBDA);
       float l4 = l3 * (l2 / s) * (l2 / s) ;
+      p = p - (m * l4 * scale);
+    }
+
+    else if (type == TYPE_SMUDGE) {
+      vec2 m = normalize(b - a);
+      vec2 n = vec2(-m.y, m.x);
+      vec2 d = p - a;
+      float s = length(b - a);
+      float l = length(dot(d, n));
+      float l2 = abs(mod(l, 2.0) - 1.0);
+      float l3 = (s * LAMBDA) / (1.0 - l2 + LAMBDA);
+      float l4 = l3 * l2 * l2 ;
       p = p - (m * l4 * scale);
     }
 

@@ -19,16 +19,11 @@ const colors = [
   0.89, 0.75, 0.33
 ]
 
-// const colors = [
-//   1, 1, 1,
-//   0.69, 0.05, 0.67,
-//   0.00, 0.76, 0.79
-// ]
-
 const types = {
   "pattern-drop": 0,
   "pattern-line": 1,
-  "pattern-comb": 2
+  "pattern-comb": 2,
+  "pattern-smudge": 3
 }
 
 let operations = []
