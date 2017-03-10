@@ -108,11 +108,6 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
   canvas.width = 800
   canvas.height = 600
 
-  const resetButton = document.getElementById('reset-button')
-  resetButton.addEventListener('click', () => {
-    operations = []
-  })
-
   const patterns = document.getElementById('patterns')
   const patternButtons = Array.from(patterns.getElementsByClassName('radio-button'))
 
@@ -290,6 +285,14 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
 
       lastOperationScale += (1 - lastOperationScale) / viscosity
     }
+
+    const resetButton = document.getElementById('reset-button')
+    resetButton.addEventListener('click', () => {
+      operations = []
+      const c = backgroundColors[getSelectedButtonId(paletteButtons)]
+      gl.clearColor(c[0], c[1], c[2], 1)
+      gl.clear(gl.COLOR_BUFFER_BIT)      
+    })
 
     requestAnimationFrame(draw)
   }
