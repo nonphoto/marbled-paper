@@ -108,6 +108,11 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
   canvas.width = 800
   canvas.height = 600
 
+  const resetButton = document.getElementById('reset-button')
+  resetButton.addEventListener('click', () => {
+    operations = []
+  })
+
   const patterns = document.getElementById('patterns')
   const patternButtons = Array.from(patterns.getElementsByClassName('radio-button'))
 
@@ -132,7 +137,7 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
       const g2 = Math.floor(255 * c2[j + 1])
       const b2 = Math.floor(255 * c2[j + 2])
       dot.style.background = `rgb(${r2}, ${g2}, ${b2})`
-      
+
       label.appendChild(dot)
     }
   })

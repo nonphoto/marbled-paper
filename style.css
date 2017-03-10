@@ -48,6 +48,18 @@ body {
   opacity: 1;
 }
 
+#reset-button {
+  text-align: center;
+  background-color: #333;
+  width: 100%;
+  padding: 0.8em 1.4em;
+  opacity: 0.2;
+}
+
+#reset-button:active {
+  opacity: 1;
+}
+
 .palette-color {
   display: inline-block;
   margin: 0 0.4em;
