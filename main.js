@@ -77,6 +77,7 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
   }
 
   const cursor = document.getElementById('cursor')
+  const cursorGraphics = Array.from(cursor.getElementsByTagName('svg'))
   
   const canvas = document.getElementById('canvas')
   canvas.width = 800
@@ -89,12 +90,22 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
   canvas.addEventListener('mousedown', (e) => {
     if (e.button !== 0) { return }
 
+    const pattern = getCheckedControl().id    
+    cursorGraphics.forEach((graphic) => {
+      if (graphic.dataset.pattern === pattern) {
+        graphic.classList.add('is-visible')
+      }
+      else {
+        graphic.classList.remove('is-visible')
+      }
+    })
+
     startX = e.clientX
     startY = e.clientY
     isDragging = true
 
-    cursor.style.opacity = 0.5;
-    cursor.style.transform = `translate(${startX}px, ${startY}px) scale(${1})`
+    cursor.style.opacity = 1;
+    cursor.style.transform = `translate(${startX}px, ${startY}px)`
   })
 
   document.addEventListener('mousemove', (e) => {
@@ -103,9 +114,10 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
     const dx = e.clientX - startX
     const dy = e.clientY - startY
     const scale = Math.sqrt((dx * dx) + (dy * dy)) * 2
-    const strokeWidth = 1 / scale
+    const strokeWidth = 2 / scale
+    const angle = Math.atan2(dx, -dy)
 
-    cursor.style.transform = `translate(${startX}px, ${startY}px) scale(${scale})`
+    cursor.style.transform = `translate(${startX}px, ${startY}px) scale(${scale}) rotate(${angle}rad)`
     cursor.style['stroke-width'] = `${strokeWidth}px`
   })
 
