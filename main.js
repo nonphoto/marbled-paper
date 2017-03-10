@@ -87,6 +87,8 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
   let isDragging = false
 
   canvas.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) { return }
+
     startX = e.clientX
     startY = e.clientY
     isDragging = true
@@ -96,33 +98,32 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
   })
 
   document.addEventListener('mousemove', (e) => {
-    if (isDragging) {
-      const dx = e.clientX - startX
-      const dy = e.clientY - startY
-      const scale = Math.sqrt((dx * dx) + (dy * dy)) * 2
-      const strokeWidth = 1 / scale
-      cursor.style.transform = `translate(${startX}px, ${startY}px) scale(${scale})`
-      cursor.style['stroke-width'] = `${strokeWidth}px`
-    }
+    if (!isDragging) { return }
+
+    const dx = e.clientX - startX
+    const dy = e.clientY - startY
+    const scale = Math.sqrt((dx * dx) + (dy * dy)) * 2
+    const strokeWidth = 1 / scale
+
+    cursor.style.transform = `translate(${startX}px, ${startY}px) scale(${scale})`
+    cursor.style['stroke-width'] = `${strokeWidth}px`
   })
 
   document.addEventListener('mouseup', (e) => {
-    if (isDragging) {
-      isDragging = false
-
-      const p1 = getPositionInCanvas(canvas, startX, startY)
-      const p2 = getPositionInCanvas(canvas, e.clientX, e.clientY)
-
-      const color = Math.floor(Math.random() * colorCount)
-      const type = types[getCheckedControl().id]
-  
-      const operation = new Operation(p1, p2, color, type)
-      operations.unshift(operation)
-      lastOperationScale = 0
-
-    }  
-
     cursor.style.opacity = 0;
+
+    if (!isDragging) { return }
+    isDragging = false
+
+    const p1 = getPositionInCanvas(canvas, startX, startY)
+    const p2 = getPositionInCanvas(canvas, e.clientX, e.clientY)
+
+    const color = Math.floor(Math.random() * colorCount)
+    const type = types[getCheckedControl().id]
+
+    const operation = new Operation(p1, p2, color, type)
+    operations.unshift(operation)
+    lastOperationScale = 0
   })
 
 	let gl = null
