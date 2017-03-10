@@ -20,7 +20,7 @@ body {
 }
 
 .controls {
-  width: 100px;
+  width: 120px;
   color: white;
   list-style-type: none;
 }
@@ -37,14 +37,23 @@ body {
 
 .control input + label {
   background-color: #333;
-  display: inline-block;
+  display: flex;
+  justify-content: center;
   width: 100%;
-  padding: 1em;
-  opacity: 0.5;
+  padding: 0.8em 1.4em;
+  opacity: 0.2;
 }
 
 .control input:checked + label {
   opacity: 1;
+}
+
+.palette-color {
+  display: inline-block;
+  margin: 0 0.4em;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
 }
 
 #cursor {

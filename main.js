@@ -113,6 +113,29 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
 
   const palettes = document.getElementById('palettes')
   const paletteButtons = Array.from(palettes.getElementsByClassName('radio-button'))
+  const paletteLabels = Array.from(palettes.getElementsByTagName('label'))
+  paletteLabels.forEach(label => {
+    const c1 = backgroundColors[label.htmlFor]
+    const c2 = colors[label.htmlFor]
+
+    const r1 = Math.floor(255 * c1[0])
+    const g1 = Math.floor(255 * c1[1])
+    const b1 = Math.floor(255 * c1[2])
+    label.style.background = `rgb(${r1}, ${g1}, ${b1})`
+
+    for (i = 0; i < 4; i++) {
+      const dot = document.createElement('span')
+      dot.classList.add('palette-color')
+
+      const j = i * 3      
+      const r2 = Math.floor(255 * c2[j])
+      const g2 = Math.floor(255 * c2[j + 1])
+      const b2 = Math.floor(255 * c2[j + 2])
+      dot.style.background = `rgb(${r2}, ${g2}, ${b2})`
+      
+      label.appendChild(dot)
+    }
+  })
 
   const cursor = document.getElementById('cursor')
   const cursorGraphics = Array.from(cursor.getElementsByTagName('svg'))
