@@ -19,7 +19,7 @@ body {
   height: 100vh;  
 }
 
-#controls {
+.controls {
   width: 100px;
   color: white;
   list-style-type: none;
@@ -28,7 +28,7 @@ body {
 .control {
   border-color: black;
   border-style: solid;
-  border-width: 1px;
+  border-width: 2px;
 }
 
 .control input {

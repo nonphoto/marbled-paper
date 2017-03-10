@@ -67,10 +67,10 @@ function getPositionInCanvas(canvas, x, y) {
 }
 
 require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vertexSource, fragmentSource) => {
-  const controls = document.getElementById('controls')
-  const buttons = Array.from(controls.getElementsByClassName('radio-button'))
-  const getCheckedControl = () => {
-    return buttons.find(button => button.checked === true)
+  const patterns = document.getElementById('patterns')
+  const patternButtons = Array.from(patterns.getElementsByClassName('radio-button'))
+  const getSelectedPattern = () => {
+    return patternButtons.find(button => button.checked === true)
   }
 
   const cursor = document.getElementById('cursor')
@@ -87,7 +87,7 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
   canvas.addEventListener('mousedown', (e) => {
     if (e.button !== 0) { return }
 
-    const pattern = getCheckedControl().id    
+    const pattern = getSelectedPattern().id    
     cursorGraphics.forEach((graphic) => {
       if (graphic.dataset.pattern === pattern) {
         graphic.classList.add('is-visible')
@@ -125,7 +125,7 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
     isDragging = false
     lastOperationScale = 0
 
-    if (getCheckedControl().id === "pattern-spray") {
+    if (getSelectedPattern().id === "pattern-spray") {
       const dx = e.clientX - startX
       const dy = e.clientY - startY
       const l = length(dx, dy)
@@ -151,7 +151,7 @@ require(['domReady!', 'text!vertex.glsl', 'text!fragment.glsl'], (document, vert
       const p2 = getPositionInCanvas(canvas, e.clientX, e.clientY)
 
       const color = Math.floor(Math.random() * colorCount)
-      const type = types[getCheckedControl().id]
+      const type = types[getSelectedPattern().id]
 
       const operation = new Operation(p1, p2, color, type)
       operations.unshift(operation)
