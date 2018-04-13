@@ -1,0 +1,32 @@
+{
+  "name": "marbled-paper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.js",
+  "scripts": {
+    "build": "webpack -p --config webpack.config.js --mode production",
+    "watch": "webpack --config webpack.config.js --mode development --watch",
+    "server": "http-server -o",
+    "start": "npm run server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nonphoto/marbled-paper.git"
+  },
+  "author": "Jonas Luebbers",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nonphoto/marbled-paper/issues"
+  },
+  "homepage": "https://github.com/nonphoto/marbled-paper",
+  "dependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.6.1",
+    "http-server": "^0.11.1",
+    "three": "^0.91.0",
+    "webpack": "^4.1.1",
+    "webpack-cli": "^2.0.14",
+    "webpack-glsl-loader": "^1.0.1"
+  }
+}
