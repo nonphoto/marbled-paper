@@ -23,8 +23,8 @@ body {
   position: fixed;
   display: flex;
   flex-direction: column;
-  top: 2rem;
-  left: 2rem;
+  top: 3rem;
+  left: 3rem;
 }
 
 .control-group {
@@ -34,7 +34,7 @@ body {
   color: white;
   padding: 0;
   margin-top: 0;
-  margin-bottom: 1em;
+  margin-bottom: 1rem;
 }
 
 .control {

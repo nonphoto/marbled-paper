@@ -12,39 +12,39 @@ const viscosity = 10
 const colorCount = 4
 
 const backgroundColors = {
-  "palette-1": [0.59, 0.05, 0.07],
-  "palette-2": [0.10, 0.14, 0.10],
-  "palette-3": [0.18, 0.15, 0.54],
-  "palette-4": [0.86, 0.74, 0.39],
-  "palette-5": [1.00, 1.00, 1.00],
+  'palette-1': [0.59, 0.05, 0.07],
+  'palette-2': [0.10, 0.14, 0.10],
+  'palette-3': [0.18, 0.15, 0.54],
+  'palette-4': [0.86, 0.74, 0.39],
+  'palette-5': [1.00, 1.00, 1.00],
 }
 
 const colors = {
-  "palette-1": [
+  'palette-1': [
     0.10, 0.22, 0.66,
     1.00, 0.96, 0.91,
     0.05, 0.13, 0.31,
     0.89, 0.75, 0.33
   ],
-  "palette-2": [
+  'palette-2': [
     0.20, 0.25, 0.19,
     0.40, 0.47, 0.38,
     0.58, 0.63, 0.55,
     0.87, 0.88, 0.79
   ],
-  "palette-3": [
+  'palette-3': [
     0.74, 0.18, 0.36,
     0.59, 0.18, 0.75,
     0.15, 0.42, 0.63,
     0.14, 0.68, 0.58
   ],
-  "palette-4": [
+  'palette-4': [
     0.62, 0.16, 0.19,
     0.31, 0.42, 0.48,
     0.75, 0.38, 0.38,
     0.03, 0.10, 0.28
   ],
-  "palette-5": [
+  'palette-5': [
     0.00, 0.76, 0.79,
     0.69, 0.05, 0.67,
     1.00, 1.00, 0.00,
@@ -53,14 +53,11 @@ const colors = {
 }
 
 const types = {
-  "pattern-drop": 0,
-  "pattern-line": 1,
-  "pattern-comb": 2,
-  "pattern-smudge": 3
+  'pattern-drop': 0,
+  'pattern-line': 1,
+  'pattern-comb': 2,
+  'pattern-smudge': 3
 }
-
-let operations = []
-let lastOperationScale = 0
 
 class Operation {
   constructor(p1, p2, color, type) {
@@ -75,10 +72,6 @@ class Operation {
   }
 }
 
-function length(x, y) {
-  return Math.sqrt((x * x) + (y * y))
-}
-
 function getSelectedButtonId(buttons) {
   return buttons.find(button => button.checked).id
 }
@@ -90,6 +83,22 @@ function getPositionInCanvas(canvas, x, y) {
   return [nx, ny]
 }
 
+const refs = {}
+refs.cursor = document.getElementById('cursor')
+refs.cursorGraphics = Array.from(refs.cursor.getElementsByTagName('svg'))
+refs.renderContainer = document.getElementById('render-container')
+refs.patterns = document.getElementById('patterns')
+refs.patternButtons = Array.from(refs.patterns.getElementsByClassName('radio-button'))
+refs.palettes = document.getElementById('palettes')
+refs.paletteButtons = Array.from(refs.palettes.getElementsByClassName('radio-button'))
+refs.paletteLabels = Array.from(refs.palettes.getElementsByTagName('label'))
+
+let mouse = new three.Vector2()
+let mouseStart = new three.Vector2()
+
+let operations = []
+let lastOperationScale = 0
+
 const vw = window.innerWidth
 const vh = window.innerHeight
 
@@ -98,9 +107,9 @@ const camera = new three.OrthographicCamera(-1, 1, 1, -1, 0.1, 10)
 camera.position.z = 1
 
 const renderer = new three.WebGLRenderer()
-renderer.setSize(vw, vh)
 const canvas = renderer.domElement
-document.querySelector('#render-container').appendChild(canvas)
+renderer.setSize(vw, vh)
+refs.renderContainer.appendChild(canvas)
 
 const geometry = new three.PlaneGeometry(2, 2)
 const material = new three.MeshBasicMaterial({ color: 0x0000ff })
@@ -109,47 +118,36 @@ scene.add(plane)
 
 renderer.render(scene, camera)
 
-const patterns = document.getElementById('patterns')
-const patternButtons = Array.from(patterns.getElementsByClassName('radio-button'))
+function initControls() {
+  refs.paletteLabels.forEach(label => {
+    const c1 = backgroundColors[label.htmlFor]
+    const c2 = colors[label.htmlFor]
 
-const palettes = document.getElementById('palettes')
-const paletteButtons = Array.from(palettes.getElementsByClassName('radio-button'))
-const paletteLabels = Array.from(palettes.getElementsByTagName('label'))
-paletteLabels.forEach(label => {
-  const c1 = backgroundColors[label.htmlFor]
-  const c2 = colors[label.htmlFor]
+    const r1 = Math.floor(255 * c1[0])
+    const g1 = Math.floor(255 * c1[1])
+    const b1 = Math.floor(255 * c1[2])
+    label.style.background = `rgb(${r1}, ${g1}, ${b1})`
 
-  const r1 = Math.floor(255 * c1[0])
-  const g1 = Math.floor(255 * c1[1])
-  const b1 = Math.floor(255 * c1[2])
-  label.style.background = `rgb(${r1}, ${g1}, ${b1})`
+    for (let i = 0; i < 4; i++) {
+      const dot = document.createElement('span')
+      dot.classList.add('palette-color')
 
-  for (let i = 0; i < 4; i++) {
-    const dot = document.createElement('span')
-    dot.classList.add('palette-color')
+      const j = i * 3
+      const r2 = Math.floor(255 * c2[j])
+      const g2 = Math.floor(255 * c2[j + 1])
+      const b2 = Math.floor(255 * c2[j + 2])
+      dot.style.background = `rgb(${r2}, ${g2}, ${b2})`
 
-    const j = i * 3
-    const r2 = Math.floor(255 * c2[j])
-    const g2 = Math.floor(255 * c2[j + 1])
-    const b2 = Math.floor(255 * c2[j + 2])
-    dot.style.background = `rgb(${r2}, ${g2}, ${b2})`
+      label.appendChild(dot)
+    }
+  })
+}
 
-    label.appendChild(dot)
-  }
-})
+function handleMouseDown(event) {
+  if (event.button !== 0) return
 
-const cursor = document.getElementById('cursor')
-const cursorGraphics = Array.from(cursor.getElementsByTagName('svg'))
-
-let startX = 0
-let startY = 0
-let isDragging = false
-
-canvas.addEventListener('mousedown', (e) => {
-  if (e.button !== 0) { return }
-
-  const pattern = getSelectedButtonId(patternButtons)
-  cursorGraphics.forEach((graphic) => {
+  const pattern = getSelectedButtonId(refs.patternButtons)
+  refs.cursorGraphics.forEach((graphic) => {
     if (graphic.dataset.pattern === pattern) {
       graphic.classList.add('is-visible')
     }
@@ -158,73 +156,75 @@ canvas.addEventListener('mousedown', (e) => {
     }
   })
 
-  startX = e.clientX
-  startY = e.clientY
-  isDragging = true
+  mouseStart = mouse.clone()
 
   cursor.style.opacity = 1
-  cursor.style.transform = `translate(${startX}px, ${startY}px)`
-})
+  cursor.style.transform = `translate(${mouseStart.x}px, ${mouseStart.y}px)`
+}
 
-document.addEventListener('mousemove', (e) => {
-  if (!isDragging) { return }
+function handleMouseMove(event) {
+  mouse.x = event.clientX
+  mouse.y = event.clientY
 
-  const dx = e.clientX - startX
-  const dy = e.clientY - startY
-  const scale = length(dx, dy) * 2
-  const strokeWidth = 2 / scale
-  const angle = Math.atan2(dx, -dy)
+  if (mouseStart) {
+    const difference = mouse.clone().sub(mouseStart)
+    const strokeWidth = 1 / difference.length
 
-  cursor.style.transform = `translate(${startX}px, ${startY}px) scale(${scale}) rotate(${angle}rad)`
-  cursor.style['stroke-width'] = `${strokeWidth}px`
-})
+    cursor.style.transform = `translate(${mouseStart.x}px, ${mouseStart.y}px) scale(${difference.length}) rotate(${difference.angle}rad)`
+    cursor.style['stroke-width'] = `${strokeWidth}px`
+  }
+}
 
-document.addEventListener('mouseup', (e) => {
+function handleMouseUp(event) {
   cursor.style.opacity = 0
 
-  if (!isDragging) { return }
-  isDragging = false
-  lastOperationScale = 0
+  if (!mouseStart) return
 
-  if (getSelectedButtonId(patternButtons) === "pattern-spray") {
-    const dx = e.clientX - startX
-    const dy = e.clientY - startY
-    const l = length(dx, dy)
-    const canvasArea = canvas.offsetWidth * canvas.offsetHeight
-    const dropCount = Math.min(Math.floor(canvasArea / l), 25)
-    const dropRadius = l / 10
+  if (getSelectedButtonId(refs.patternButtons) === 'pattern-spray') {
+    const difference = mouse.clone().sub(mouseStart)
+    const canvasArea = vw * vh
+    const dropCount = Math.min(Math.floor(canvasArea / difference.length), 25)
+    const dropRadius = difference.length / 10
     const dropColor = Math.floor(Math.random() * colorCount)
 
     for (let i = 0; i < dropCount; i++) {
-      const x = Math.random() * canvas.offsetWidth
-      const y = Math.random() * canvas.offsetHeight
+      const x = Math.random() * vw
+      const y = Math.random() * vh
 
       const p1 = [x, y]
       const p2 = [x, y + dropRadius]
-      const type = types["pattern-drop"]
+      const type = types['pattern-drop']
 
       const operation = new Operation(p1, p2, dropColor, type)
       operations.unshift(operation)
     }
   }
   else {
-    const p1 = getPositionInCanvas(canvas, startX, startY)
-    const p2 = getPositionInCanvas(canvas, e.clientX, e.clientY)
+    const p1 = getPositionInCanvas(canvas, mouseStart.x, mouseStart.y)
+    const p2 = getPositionInCanvas(canvas, mouse.x, mouse.y)
 
     const color = Math.floor(Math.random() * colorCount)
-    const type = types[getSelectedButtonId(patternButtons)]
+    const type = types[getSelectedButtonId(refs.patternButtons)]
 
     const operation = new Operation(p1, p2, color, type)
     operations.unshift(operation)
   }
-})
 
+  mouseStart = null
+  lastOperationScale = 0
+}
+
+canvas.addEventListener('mousedown', handleMouseDown)
+document.addEventListener('mousemove', handleMouseMove)
+document.addEventListener('mouseup', handleMouseUp)
+
+initControls()
 
 function initWebGl() {
   let gl = null
-  gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl")
+  gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
   if (!gl) {
-    alert("Unable to initialize WebGL. Maybe your browser doesn't support it.")
+    alert('Unable to initialize WebGL. Maybe your browser doesn\'t support it.')
     return
   }
 
@@ -301,5 +301,4 @@ function initWebGl() {
   }
 
   draw()
-
 }
