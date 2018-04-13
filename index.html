@@ -5,64 +5,62 @@
 	<meta charset="UTF-8">
 	<title>Marbled Paper</title>
 	<link rel="stylesheet" type="text/css" href="style.css">
-	<script src="main.js" type="text/javascript" defer></script>
+	<script src="dist/bundle.js" type="text/javascript" defer></script>
 </head>
 
 <body>
-	<div class="content">
-		<canvas id="canvas">
-		</canvas>
-		<div>
-			<ul class="controls">
-				<li class="control" id="reset-button">
-					Reset
-				</li>
-			</ul>
-			<ul class="controls" id="patterns">
-				<li class="control">
-					<input class="radio-button" type="radio" name="pattern" id="pattern-drop" checked>
-					<label for="pattern-drop">Drop</label>
-				</li>
-				<li class="control">
-					<input class="radio-button" type="radio" name="pattern" id="pattern-spray">
-					<label for="pattern-spray">Spray</label>
-				</li>
-				<li class="control">
-					<input class="radio-button" type="radio" name="pattern" id="pattern-line">
-					<label for="pattern-line">Line</label>
-				</li>
-				<li class="control">
-					<input class="radio-button" type="radio" name="pattern" id="pattern-comb">
-					<label for="pattern-comb">Comb</label>
-				</li>
-				<li class="control">
-					<input class="radio-button" type="radio" name="pattern" id="pattern-smudge">
-					<label for="pattern-smudge">Smudge</label>
-				</li>
-			</ul>
-			<ul class="controls" id="palettes">
-				<li class="control">
-					<input class="radio-button" type="radio" name="palette" id="palette-1" checked>
-					<label for="palette-1"></label>
-				</li>
-				<li class="control">
-					<input class="radio-button" type="radio" name="palette" id="palette-2">
-					<label for="palette-2"></label>
-				</li>
-				<li class="control">
-					<input class="radio-button" type="radio" name="palette" id="palette-3">
-					<label for="palette-3"></label>
-				</li>
-				<li class="control">
-					<input class="radio-button" type="radio" name="palette" id="palette-4">
-					<label for="palette-4"></label>
-				</li>
-				<li class="control">
-					<input class="radio-button" type="radio" name="palette" id="palette-5">
-					<label for="palette-5"></label>
-				</li>
-			</ul>
-		</div>
+	<div id="render-container"></div>
+
+	<div id="control-panel">
+		<ul class="control-group">
+			<li class="control trigger" id="reset-button">
+				Reset
+			</li>
+		</ul>
+		<ul class="control-group" id="patterns">
+			<li class="control">
+				<input class="radio-button" type="radio" name="pattern" id="pattern-drop" checked>
+				<label for="pattern-drop">Drop</label>
+			</li>
+			<li class="control">
+				<input class="radio-button" type="radio" name="pattern" id="pattern-spray">
+				<label for="pattern-spray">Spray</label>
+			</li>
+			<li class="control">
+				<input class="radio-button" type="radio" name="pattern" id="pattern-line">
+				<label for="pattern-line">Line</label>
+			</li>
+			<li class="control">
+				<input class="radio-button" type="radio" name="pattern" id="pattern-comb">
+				<label for="pattern-comb">Comb</label>
+			</li>
+			<li class="control">
+				<input class="radio-button" type="radio" name="pattern" id="pattern-smudge">
+				<label for="pattern-smudge">Smudge</label>
+			</li>
+		</ul>
+		<ul class="control-group" id="palettes">
+			<li class="control">
+				<input class="radio-button" type="radio" name="palette" id="palette-1" checked>
+				<label for="palette-1"></label>
+			</li>
+			<li class="control">
+				<input class="radio-button" type="radio" name="palette" id="palette-2">
+				<label for="palette-2"></label>
+			</li>
+			<li class="control">
+				<input class="radio-button" type="radio" name="palette" id="palette-3">
+				<label for="palette-3"></label>
+			</li>
+			<li class="control">
+				<input class="radio-button" type="radio" name="palette" id="palette-4">
+				<label for="palette-4"></label>
+			</li>
+			<li class="control">
+				<input class="radio-button" type="radio" name="palette" id="palette-5">
+				<label for="palette-5"></label>
+			</li>
+		</ul>
 	</div>
 
 	<div id="cursor">
