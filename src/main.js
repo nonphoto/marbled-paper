@@ -1,4 +1,8 @@
-import * as three from 'three'
+import getPositionInBounds from './get-position-in-bounds'
+import getContext from './get-context'
+import drawTriangle from 'a-big-triangle'
+import loop from 'raf-loop'
+import {vec2} from 'gl-matrix'
 
 const vertexPositions = [
   -1, -1, 0,
@@ -76,13 +80,6 @@ function getSelectedButtonId(buttons) {
   return buttons.find(button => button.checked).id
 }
 
-function getPositionInCanvas(canvas, x, y) {
-  const bounds = canvas.getBoundingClientRect()
-  const nx = x - bounds.left
-  const ny = -(y - bounds.bottom)
-  return [nx, ny]
-}
-
 const refs = {}
 refs.cursor = document.getElementById('cursor')
 refs.cursorGraphics = Array.from(refs.cursor.getElementsByTagName('svg'))
@@ -93,30 +90,13 @@ refs.palettes = document.getElementById('palettes')
 refs.paletteButtons = Array.from(refs.palettes.getElementsByClassName('radio-button'))
 refs.paletteLabels = Array.from(refs.palettes.getElementsByTagName('label'))
 
-let mouse = new three.Vector2()
-let mouseStart = new three.Vector2()
-
+let mouse = vec2.create()
+let mouseStart = vec2.create()
 let operations = []
 let lastOperationScale = 0
 
 const vw = window.innerWidth
 const vh = window.innerHeight
-
-const scene = new three.Scene()
-const camera = new three.OrthographicCamera(-1, 1, 1, -1, 0.1, 10)
-camera.position.z = 1
-
-const renderer = new three.WebGLRenderer()
-const canvas = renderer.domElement
-renderer.setSize(vw, vh)
-refs.renderContainer.appendChild(canvas)
-
-const geometry = new three.PlaneGeometry(2, 2)
-const material = new three.MeshBasicMaterial({ color: 0x0000ff })
-const plane = new three.Mesh(geometry, material)
-scene.add(plane)
-
-renderer.render(scene, camera)
 
 function initControls() {
   refs.paletteLabels.forEach(label => {
@@ -156,22 +136,25 @@ function handleMouseDown(event) {
     }
   })
 
-  mouseStart = mouse.clone()
+  mouseStart = vec2.clone(mouse)
 
   cursor.style.opacity = 1
   cursor.style.transform = `translate(${mouseStart.x}px, ${mouseStart.y}px)`
 }
 
 function handleMouseMove(event) {
-  mouse.x = event.clientX
-  mouse.y = event.clientY
+  mouse[0] = event.clientX
+  mouse[1] = event.clientY
 
   if (mouseStart) {
-    const difference = mouse.clone().sub(mouseStart)
-    const strokeWidth = 1 / difference.length
+    const difference = vec2.subtract([], mouse, mouseStart)
 
-    cursor.style.transform = `translate(${mouseStart.x}px, ${mouseStart.y}px) scale(${difference.length}) rotate(${difference.angle}rad)`
-    cursor.style['stroke-width'] = `${strokeWidth}px`
+    const s = vec2.length(difference)
+    const a = vec2.angle([1, 0], difference)
+    const [x, y] = mouseStart
+
+    cursor.style.transform = `translate(${x}px, ${y}px) scale(${s}) rotate(${a}rad)`
+    cursor.style.strokeWidth = `${1 / s}px`
   }
 }
 
@@ -181,10 +164,13 @@ function handleMouseUp(event) {
   if (!mouseStart) return
 
   if (getSelectedButtonId(refs.patternButtons) === 'pattern-spray') {
-    const difference = mouse.clone().sub(mouseStart)
+    const difference = vec2.subtract([], mouse, mouseStart)
+
+    const l = vec2.length(difference)
+
     const canvasArea = vw * vh
-    const dropCount = Math.min(Math.floor(canvasArea / difference.length), 25)
-    const dropRadius = difference.length / 10
+    const dropCount = Math.min(Math.floor(canvasArea / l), 25)
+    const dropRadius = l / 10
     const dropColor = Math.floor(Math.random() * colorCount)
 
     for (let i = 0; i < dropCount; i++) {
@@ -200,8 +186,9 @@ function handleMouseUp(event) {
     }
   }
   else {
-    const p1 = getPositionInCanvas(canvas, mouseStart.x, mouseStart.y)
-    const p2 = getPositionInCanvas(canvas, mouse.x, mouse.y)
+    const bounds = canvas.getBoundingClientRect()
+    const p1 = getPositionInBounds(bounds, mouseStart)
+    const p2 = getPositionInBounds(bounds, mouse)
 
     const color = Math.floor(Math.random() * colorCount)
     const type = types[getSelectedButtonId(refs.patternButtons)]
@@ -214,91 +201,16 @@ function handleMouseUp(event) {
   lastOperationScale = 0
 }
 
+const canvas = document.querySelector('#render-canvas')
+const gl = getContext(canvas)
+
+canvas.width = canvas.clientWidth
+canvas.height = canvas.clientHeight
+
+gl.clearColor(0, 0, 1, 1)
+gl.viewport(0, 0, canvas.width, canvas.height)
+gl.clear(gl.COLOR_BUFFER_BIT)
+
 canvas.addEventListener('mousedown', handleMouseDown)
 document.addEventListener('mousemove', handleMouseMove)
 document.addEventListener('mouseup', handleMouseUp)
-
-initControls()
-
-function initWebGl() {
-  let gl = null
-  gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
-  if (!gl) {
-    alert('Unable to initialize WebGL. Maybe your browser doesn\'t support it.')
-    return
-  }
-
-  gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
-
-  const vertexShader = loadShader(gl, vertexSource, gl.VERTEX_SHADER)
-  const fragmentShader = loadShader(gl, fragmentSource, gl.FRAGMENT_SHADER)
-
-  program = gl.createProgram()
-  gl.attachShader(program, vertexShader)
-  gl.attachShader(program, fragmentShader)
-  gl.linkProgram(program)
-
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    console.error('Unable to initialize the shader program: ' + gl.getProgramInfoLog(program))
-    return
-  }
-
-  gl.useProgram(program)
-  gl.clearColor(0.1, 0.1, 0.1, 1)
-
-  const vertexPositionAttribute = gl.getAttribLocation(program, 'vertexPosition')
-  const resolutionUniform = gl.getUniformLocation(program, 'resolution')
-  const colorsUniform = gl.getUniformLocation(program, 'colors')
-  const backgroundColorUniform = gl.getUniformLocation(program, 'backgroundColor')
-  const operationCountUniform = gl.getUniformLocation(program, 'operationCount')
-  const operationTypesUniform = gl.getUniformLocation(program, 'operationTypes')
-  const operationColorsUniform = gl.getUniformLocation(program, 'operationColors')
-  const operationCoordinatesUniform = gl.getUniformLocation(program, 'operationCoordinates')
-  const lastOperationScaleUniform = gl.getUniformLocation(program, 'lastOperationScale')
-
-  const vertexPositionBuffer = gl.createBuffer()
-  gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer)
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexPositions), gl.STATIC_DRAW)
-
-  function draw() {
-    gl.clear(gl.COLOR_BUFFER_BIT)
-
-    if (operations.length > 0) {
-      const operationTypes = operations.map(op => op.type)
-      const operationColors = operations.map(op => op.color)
-      const operationCoordinates = operations.map(op => op.coordinates()).reduce((acc, val) => acc.concat(val))
-
-      const selectedButtonId = getSelectedButtonId(paletteButtons)
-      const selectedBackground = backgroundColors[selectedButtonId]
-      const selectedColors = colors[selectedButtonId]
-
-      gl.uniform2f(resolutionUniform, canvas.width, canvas.height)
-      gl.uniform3fv(colorsUniform, selectedColors)
-      gl.uniform3f(backgroundColorUniform, selectedBackground[0], selectedBackground[1], selectedBackground[2])
-      gl.uniform1i(operationCountUniform, operations.length)
-      gl.uniform1iv(operationTypesUniform, operationTypes)
-      gl.uniform1iv(operationColorsUniform, operationColors)
-      gl.uniform4fv(operationCoordinatesUniform, operationCoordinates)
-      gl.uniform1f(lastOperationScaleUniform, lastOperationScale)
-
-      gl.enableVertexAttribArray(vertexPositionAttribute)
-      gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0)
-
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-
-      lastOperationScale += (1 - lastOperationScale) / viscosity
-    }
-
-    const resetButton = document.getElementById('reset-button')
-    resetButton.addEventListener('click', () => {
-      operations = []
-      const c = backgroundColors[getSelectedButtonId(paletteButtons)]
-      gl.clearColor(c[0], c[1], c[2], 1)
-      gl.clear(gl.COLOR_BUFFER_BIT)
-    })
-
-    requestAnimationFrame(draw)
-  }
-
-  draw()
-}
