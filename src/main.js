@@ -1,7 +1,11 @@
 import getPositionInBounds from './get-position-in-bounds'
 import getContext from './get-context'
-import drawTriangle from 'a-big-triangle'
+import vertexSource from './vertex.glsl'
+import fragmentSource from './fragment.glsl'
+
 import loop from 'raf-loop'
+import drawTriangle from 'a-big-triangle'
+import createShader from 'gl-shader'
 import {vec2} from 'gl-matrix'
 
 const vertexPositions = [
@@ -153,7 +157,7 @@ function handleMouseMove(event) {
     const a = vec2.angle([1, 0], difference)
     const [x, y] = mouseStart
 
-    cursor.style.transform = `translate(${x}px, ${y}px) scale(${s}) rotate(${a}rad)`
+    cursor.style.transform = `translate(${x}px, ${y}px) scale(${2 * s}) rotate(${a}rad)`
     cursor.style.strokeWidth = `${1 / s}px`
   }
 }
@@ -207,10 +211,19 @@ const gl = getContext(canvas)
 canvas.width = canvas.clientWidth
 canvas.height = canvas.clientHeight
 
+canvas.addEventListener('mousedown', handleMouseDown)
+document.addEventListener('mousemove', handleMouseMove)
+document.addEventListener('mouseup', handleMouseUp)
+
 gl.clearColor(0, 0, 1, 1)
 gl.viewport(0, 0, canvas.width, canvas.height)
 gl.clear(gl.COLOR_BUFFER_BIT)
 
-canvas.addEventListener('mousedown', handleMouseDown)
-document.addEventListener('mousemove', handleMouseMove)
-document.addEventListener('mouseup', handleMouseUp)
+const shader = createShader(gl, vertexSource, fragmentSource)
+
+const engine = loop(() => {
+  shader.bind()
+  drawTriangle(gl)
+})
+
+engine.start()
