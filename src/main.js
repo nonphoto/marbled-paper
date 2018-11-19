@@ -75,7 +75,7 @@ class Operation {
     this.type = type
   }
 
-  coordinates() {
+  get coordinates() {
     return this.p1.concat(this.p2)
   }
 }
@@ -219,10 +219,30 @@ gl.clearColor(0, 0, 1, 1)
 gl.viewport(0, 0, canvas.width, canvas.height)
 gl.clear(gl.COLOR_BUFFER_BIT)
 
+// TEMP: Add a single operation
+const color = Math.floor(Math.random() * colorCount)
+const type = types[getSelectedButtonId(refs.patternButtons)]
+const operation = new Operation([0, 0], [1, 1], color, type)
+operations.unshift(operation)
+
 const shader = createShader(gl, vertexSource, fragmentSource)
+shader.bind()
+
+shader.uniforms.resolution = [canvas.width, canvas.height]
+shader.uniforms.colors = [
+  [0.10, 0.22, 0.66],
+  [1.00, 0.96, 0.91],
+  [0.05, 0.13, 0.31],
+  [0.89, 0.75, 0.33]
+]
+shader.uniforms.backgroundColor = [0.59, 0.05, 0.07]
+shader.uniforms.operationCount = operations.length
+shader.uniforms.operationTypes = operations.map(op => op.type)
+shader.uniforms.operationColors = operations.map(op => op.color)
+shader.uniforms.operationCoordinates = operations.map(op => op.coordinates)
+shader.uniforms.lastOperationScale
 
 const engine = loop(() => {
-  shader.bind()
   drawTriangle(gl)
 })
 

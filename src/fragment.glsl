@@ -1,7 +1,5 @@
 precision mediump float;
 
-const bool ANTIALIASING = false;
-
 const float ALPHA = 250.0;
 const float LAMBDA = 20.0;
 
@@ -10,7 +8,7 @@ const int TYPE_LINE = 1;
 const int TYPE_COMB = 2;
 const int TYPE_SMUDGE = 3;
 
-const int MAX_COLORS = 8;
+const int MAX_COLORS = 4;
 const int MAX_PATTERNS = 256;
 
 uniform vec2 resolution;
@@ -111,5 +109,6 @@ vec4 getColorAtPosition(vec2 position) {
 }
 
 void main() {
-  gl_FragColor = getColorAtPosition(gl_FragCoord.xy);
+  vec2 uv = gl_FragCoord.xy / resolution;
+  gl_FragColor = getColorAtPosition(uv);
 }
