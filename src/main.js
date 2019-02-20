@@ -187,6 +187,7 @@ function handleMouseUp(event) {
 
       const operation = new Operation(p1, p2, dropColor, type)
       operations.unshift(operation)
+      operations.pop()
     }
   }
   else {
@@ -237,12 +238,13 @@ shader.uniforms.colors = [
 ]
 shader.uniforms.backgroundColor = [0.59, 0.05, 0.07]
 shader.uniforms.operationCount = operations.length
-shader.uniforms.operationTypes = operations.map(op => op.type)
-shader.uniforms.operationColors = operations.map(op => op.color)
-shader.uniforms.operationCoordinates = operations.map(op => op.coordinates)
-shader.uniforms.lastOperationScale
 
 const engine = loop(() => {
+  shader.uniforms.operationTypes = operations.map(op => op.type)
+  shader.uniforms.operationColors = operations.map(op => op.color)
+  shader.uniforms.operationCoordinates = operations.map(op => op.coordinates)
+  shader.uniforms.lastOperationScale
+
   drawTriangle(gl)
 })
 
