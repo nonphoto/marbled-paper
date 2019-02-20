@@ -87,44 +87,41 @@ class Operation {
 }
 
 let mouse = vec2.create()
-let mouseStart = vec2.create()
+let isMouseDown = false
 let operations = []
+
+const canvas = document.querySelector('#render-canvas')
+const bounds = canvas.getBoundingClientRect()
+const gl = getContext(canvas)
+
+canvas.width = canvas.clientWidth
+canvas.height = canvas.clientHeight
 
 function handleMouseDown(event) {
   if (event.button !== 0) return
 
-  mouseStart = vec2.clone(mouse)
+  const op = operations.pop()
+  operations.unshift(op)
+  op.color = colors[Math.floor(Math.random() * colors.length)]
+  op.start = getPositionInBounds(bounds, mouse)
+  op.end = vec2.clone(op.start)
+
+  isMouseDown = true
 }
 
 function handleMouseMove(event) {
   mouse[0] = event.clientX
   mouse[1] = event.clientY
 
-  if (mouseStart) {
-    // const difference = vec2.subtract([], mouse, mouseStart)
+  if (isMouseDown) {
+    const op = operations[0]
+    op.end = getPositionInBounds(bounds, mouse)
   }
 }
 
-function handleMouseUp(event) {
-  if (!mouseStart) return
-
-  const bounds = canvas.getBoundingClientRect()
-  const start = getPositionInBounds(bounds, mouseStart)
-  const end = getPositionInBounds(bounds, mouse)
-
-  const color = colors[Math.floor(Math.random() * colors.length)]
-  const operation = new Operation(start, end, color, 0)
-  operations.unshift(operation)
-  operations.pop()
-
-  mouseStart = null
+function handleMouseUp() {
+  isMouseDown = false
 }
-
-const canvas = document.querySelector('#render-canvas')
-const gl = getContext(canvas)
-
-canvas.width = canvas.clientWidth
-canvas.height = canvas.clientHeight
 
 canvas.addEventListener('mousedown', handleMouseDown)
 document.addEventListener('mousemove', handleMouseMove)
