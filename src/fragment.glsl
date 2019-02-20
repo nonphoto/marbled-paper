@@ -9,7 +9,7 @@ const int TYPE_COMB = 2;
 const int TYPE_SMUDGE = 3;
 
 const int MAX_COLORS = 4;
-const int MAX_PATTERNS = 256;
+const int MAX_PATTERNS = 16;
 
 uniform vec2 resolution;
 

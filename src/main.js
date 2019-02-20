@@ -219,11 +219,11 @@ gl.clearColor(0, 0, 1, 1)
 gl.viewport(0, 0, canvas.width, canvas.height)
 gl.clear(gl.COLOR_BUFFER_BIT)
 
-// TEMP: Add a single operation
-const color = Math.floor(Math.random() * colorCount)
-const type = types[getSelectedButtonId(refs.patternButtons)]
-const operation = new Operation([0, 0], [1, 1], color, type)
-operations.unshift(operation)
+for (let i = 0; i < 16; i++) {
+  const color = Math.floor(Math.random() * colorCount)
+  const operation = new Operation([0, 0], [0.1, 0.1], color, 0)
+  operations.unshift(operation)
+}
 
 const shader = createShader(gl, vertexSource, fragmentSource)
 shader.bind()
