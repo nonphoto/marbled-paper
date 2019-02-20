@@ -8,16 +8,7 @@ import drawTriangle from 'a-big-triangle'
 import createShader from 'gl-shader'
 import {vec2} from 'gl-matrix'
 
-const vertexPositions = [
-  -1, -1, 0,
-  -1, 1, 0,
-  1, -1, 0,
-  1, 1, 0
-]
-
-const minSize = 50
 const viscosity = 10
-const colorCount = 4
 
 // const backgroundColors = {
 //   'palette-1': [0.59, 0.05, 0.07],
@@ -82,16 +73,22 @@ class Operation {
     this.end = end
     this.color = color
     this.type = type
-    this.scale = 1
+    this.scale = 0
+  }
+
+  update() {
+    if (1 - this.scale > 0.0001) {
+      this.scale += (1 - this.scale) / viscosity
+    }
+    else {
+      this.scale = 1
+    }
   }
 }
 
 let mouse = vec2.create()
 let mouseStart = vec2.create()
 let operations = []
-
-const vw = window.innerWidth
-const vh = window.innerHeight
 
 function handleMouseDown(event) {
   if (event.button !== 0) return
@@ -115,12 +112,10 @@ function handleMouseUp(event) {
   const start = getPositionInBounds(bounds, mouseStart)
   const end = getPositionInBounds(bounds, mouse)
 
-  const color = colors[Math.floor(Math.random() * colorCount)]
+  const color = colors[Math.floor(Math.random() * colors.length)]
   const operation = new Operation(start, end, color, 0)
   operations.unshift(operation)
   operations.pop()
-
-  console.log(operations)
 
   mouseStart = null
 }
@@ -140,7 +135,7 @@ gl.viewport(0, 0, canvas.width, canvas.height)
 gl.clear(gl.COLOR_BUFFER_BIT)
 
 for (let i = 0; i < 16; i++) {
-  const color = colors[Math.floor(Math.random() * colorCount)]
+  const color = colors[Math.floor(Math.random() * colors.length)]
   const operation = new Operation([0, 0], [0.1, 0.1], color, 0)
   operations.unshift(operation)
 }
@@ -153,13 +148,13 @@ shader.uniforms.colors = [].concat(...colors)
 shader.uniforms.backgroundColor = backgroundColor
 
 const engine = loop(() => {
+  operations.forEach((op) => {
+    op.update()
+  })
+
   shader.uniforms.operations = operations
 
   drawTriangle(gl)
-
-  // if (1 - lastOperationScale > 0.01) {
-  //   lastOperationScale += (1 - lastOperationScale) / viscosity
-  // }
 })
 
 engine.start()

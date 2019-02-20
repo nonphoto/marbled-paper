@@ -1,4 +1,4 @@
-html, body, #render-container {
+html, body {
   width: 100%;
   height: 100%;
 }
@@ -12,11 +12,14 @@ html {
 body {
   margin: 0;
   padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 #render-canvas {
-  width: 100%;
-  height: 100%;
+  width: 100vmin;
+  height: 100vmin;
 }
 
 #control-panel {
