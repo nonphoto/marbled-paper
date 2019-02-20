@@ -84,16 +84,6 @@ function getSelectedButtonId(buttons) {
   return buttons.find(button => button.checked).id
 }
 
-const refs = {}
-refs.cursor = document.getElementById('cursor')
-refs.cursorGraphics = Array.from(refs.cursor.getElementsByTagName('svg'))
-refs.renderContainer = document.getElementById('render-container')
-refs.patterns = document.getElementById('patterns')
-refs.patternButtons = Array.from(refs.patterns.getElementsByClassName('radio-button'))
-refs.palettes = document.getElementById('palettes')
-refs.paletteButtons = Array.from(refs.palettes.getElementsByClassName('radio-button'))
-refs.paletteLabels = Array.from(refs.palettes.getElementsByTagName('label'))
-
 let mouse = vec2.create()
 let mouseStart = vec2.create()
 let operations = []
@@ -102,48 +92,10 @@ let lastOperationScale = 0
 const vw = window.innerWidth
 const vh = window.innerHeight
 
-function initControls() {
-  refs.paletteLabels.forEach(label => {
-    const c1 = backgroundColors[label.htmlFor]
-    const c2 = colors[label.htmlFor]
-
-    const r1 = Math.floor(255 * c1[0])
-    const g1 = Math.floor(255 * c1[1])
-    const b1 = Math.floor(255 * c1[2])
-    label.style.background = `rgb(${r1}, ${g1}, ${b1})`
-
-    for (let i = 0; i < 4; i++) {
-      const dot = document.createElement('span')
-      dot.classList.add('palette-color')
-
-      const j = i * 3
-      const r2 = Math.floor(255 * c2[j])
-      const g2 = Math.floor(255 * c2[j + 1])
-      const b2 = Math.floor(255 * c2[j + 2])
-      dot.style.background = `rgb(${r2}, ${g2}, ${b2})`
-
-      label.appendChild(dot)
-    }
-  })
-}
-
 function handleMouseDown(event) {
   if (event.button !== 0) return
 
-  const pattern = getSelectedButtonId(refs.patternButtons)
-  refs.cursorGraphics.forEach((graphic) => {
-    if (graphic.dataset.pattern === pattern) {
-      graphic.classList.add('is-visible')
-    }
-    else {
-      graphic.classList.remove('is-visible')
-    }
-  })
-
   mouseStart = vec2.clone(mouse)
-
-  cursor.style.opacity = 1
-  cursor.style.transform = `translate(${mouseStart.x}px, ${mouseStart.y}px)`
 }
 
 function handleMouseMove(event) {
@@ -151,56 +103,21 @@ function handleMouseMove(event) {
   mouse[1] = event.clientY
 
   if (mouseStart) {
-    const difference = vec2.subtract([], mouse, mouseStart)
-
-    const s = vec2.length(difference)
-    const a = vec2.angle([1, 0], difference)
-    const [x, y] = mouseStart
-
-    cursor.style.transform = `translate(${x}px, ${y}px) scale(${2 * s}) rotate(${a}rad)`
-    cursor.style.strokeWidth = `${1 / s}px`
+    // const difference = vec2.subtract([], mouse, mouseStart)
   }
 }
 
 function handleMouseUp(event) {
-  cursor.style.opacity = 0
-
   if (!mouseStart) return
 
-  if (getSelectedButtonId(refs.patternButtons) === 'pattern-spray') {
-    const difference = vec2.subtract([], mouse, mouseStart)
+  const bounds = canvas.getBoundingClientRect()
+  const p1 = getPositionInBounds(bounds, mouseStart)
+  const p2 = getPositionInBounds(bounds, mouse)
 
-    const l = vec2.length(difference)
-
-    const canvasArea = vw * vh
-    const dropCount = Math.min(Math.floor(canvasArea / l), 25)
-    const dropRadius = l / 10
-    const dropColor = Math.floor(Math.random() * colorCount)
-
-    for (let i = 0; i < dropCount; i++) {
-      const x = Math.random() * vw
-      const y = Math.random() * vh
-
-      const p1 = [x, y]
-      const p2 = [x, y + dropRadius]
-      const type = types['pattern-drop']
-
-      const operation = new Operation(p1, p2, dropColor, type)
-      operations.unshift(operation)
-      operations.pop()
-    }
-  }
-  else {
-    const bounds = canvas.getBoundingClientRect()
-    const p1 = getPositionInBounds(bounds, mouseStart)
-    const p2 = getPositionInBounds(bounds, mouse)
-
-    const color = Math.floor(Math.random() * colorCount)
-    const type = types[getSelectedButtonId(refs.patternButtons)]
-
-    const operation = new Operation(p1, p2, color, type)
-    operations.unshift(operation)
-  }
+  const color = Math.floor(Math.random() * colorCount)
+  const operation = new Operation(p1, p2, color, 0)
+  operations.unshift(operation)
+  operations.pop()
 
   mouseStart = null
   lastOperationScale = 0
