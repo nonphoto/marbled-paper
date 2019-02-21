@@ -102,7 +102,7 @@ const gl = getContext(canvas)
 canvas.width = 512
 canvas.height = 512
 
-function handleMouseDown(event) {
+canvas.addEventListener('mousedown', () => {
   if (event.button !== 0) return
 
   const op = operations.pop()
@@ -113,9 +113,9 @@ function handleMouseDown(event) {
   op.type = types[options.operationTypeSelection]
 
   isMouseDown = true
-}
+})
 
-function handleMouseMove(event) {
+document.addEventListener('mousemove', () => {
   mouse[0] = event.clientX
   mouse[1] = event.clientY
 
@@ -123,15 +123,11 @@ function handleMouseMove(event) {
     const op = operations[0]
     op.end = getPositionInBounds(bounds, mouse)
   }
-}
+})
 
-function handleMouseUp() {
+document.addEventListener('mouseup', () => {
   isMouseDown = false
-}
-
-canvas.addEventListener('mousedown', handleMouseDown)
-document.addEventListener('mousemove', handleMouseMove)
-document.addEventListener('mouseup', handleMouseUp)
+})
 
 gl.clearColor(0, 0, 1, 1)
 gl.viewport(0, 0, canvas.width, canvas.height)
