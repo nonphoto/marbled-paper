@@ -104,8 +104,8 @@ const canvas = document.querySelector('#render-canvas')
 const bounds = canvas.getBoundingClientRect()
 const gl = getContext(canvas)
 
-canvas.width = canvas.clientWidth
-canvas.height = canvas.clientHeight
+canvas.width = 512
+canvas.height = 512
 
 function handleMouseDown(event) {
   if (event.button !== 0) return

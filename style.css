@@ -20,6 +20,8 @@ body {
 #render-canvas {
   width: 100vmin;
   height: 100vmin;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 #control-panel {
