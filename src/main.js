@@ -7,8 +7,18 @@ import loop from 'raf-loop'
 import drawTriangle from 'a-big-triangle'
 import createShader from 'gl-shader'
 import {vec2} from 'gl-matrix'
+import ControlKit from 'controlkit'
 
 const viscosity = 10
+
+const options = {
+  operationType: ['drop', 'line', 'comb', 'smudge'],
+  operationTypeSelection: 'drop'
+}
+
+const controls = new ControlKit()
+const panel = controls.addPanel()
+panel.addSelect(options, 'operationType', { target: 'operationTypeSelection'})
 
 // const backgroundColors = {
 //   'palette-1': [0.59, 0.05, 0.07],
@@ -61,10 +71,10 @@ const colors = [
 ]
 
 const types = {
-  'pattern-drop': 0,
-  'pattern-line': 1,
-  'pattern-comb': 2,
-  'pattern-smudge': 3
+  'drop': 0,
+  'line': 1,
+  'comb': 2,
+  'smudge': 3
 }
 
 class Operation {
@@ -73,7 +83,7 @@ class Operation {
     this.end = end
     this.color = color
     this.type = type
-    this.scale = 0
+    this.scale = 1
   }
 
   update() {
@@ -105,6 +115,9 @@ function handleMouseDown(event) {
   op.color = colors[Math.floor(Math.random() * colors.length)]
   op.start = getPositionInBounds(bounds, mouse)
   op.end = vec2.clone(op.start)
+  op.type = types[options.operationTypeSelection]
+
+  console.log(operations)
 
   isMouseDown = true
 }
@@ -145,10 +158,6 @@ shader.uniforms.colors = [].concat(...colors)
 shader.uniforms.backgroundColor = backgroundColor
 
 const engine = loop(() => {
-  operations.forEach((op) => {
-    op.update()
-  })
-
   shader.uniforms.operations = operations
 
   drawTriangle(gl)

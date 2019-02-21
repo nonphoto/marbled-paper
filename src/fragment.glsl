@@ -1,7 +1,7 @@
 precision mediump float;
 
-const float ALPHA = 250.0;
-const float LAMBDA = 20.0;
+const float ALPHA = 0.25;
+const float LAMBDA = 0.02;
 const int MAX_OPS = 16;
 
 struct Operation {
@@ -47,7 +47,7 @@ vec4 getColorAtPosition(vec2 position) {
       vec2 d = p - op.start;
       float l = length(dot(d, n));
       float l2 = (ALPHA * LAMBDA) / (l + LAMBDA);
-      p = p - (m * l2 * op.scale);
+      p = p - (m * l2);
     }
 
     // Comb
