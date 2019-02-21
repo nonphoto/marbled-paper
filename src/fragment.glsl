@@ -35,7 +35,7 @@ vec4 getColorAtPosition(vec2 position) {
       float r = op.scale * length(op.end - op.start);
       float l = length(d);
       if (l - r < 0.0) {
-        return vec4(op.color, 1.0);
+        return vec4(op.color / 255.0, 1.0);
       }
       else {
         float l2 = sqrt((l * l) - (r * r));
@@ -85,7 +85,7 @@ vec4 getColorAtPosition(vec2 position) {
     }
   }
 
-  return vec4(backgroundColor, 1.0);
+  return vec4(backgroundColor / 255.0, 1.0);
 }
 
 void main() {

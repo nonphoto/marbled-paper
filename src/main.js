@@ -13,12 +13,14 @@ const viscosity = 10
 
 const options = {
   operationType: ['drop', 'line', 'comb', 'smudge'],
-  operationTypeSelection: 'drop'
+  operationTypeSelection: 'drop',
+  color: [255, 219, 93]
 }
 
 const controls = new ControlKit()
 const panel = controls.addPanel()
 panel.addSelect(options, 'operationType', { target: 'operationTypeSelection'})
+panel.addColor(options, 'color', { colorMode: 'rgb' })
 
 // const backgroundColors = {
 //   'palette-1': [0.59, 0.05, 0.07],
@@ -61,14 +63,7 @@ panel.addSelect(options, 'operationType', { target: 'operationTypeSelection'})
 //   ]
 // }
 
-const backgroundColor = [0.59, 0.05, 0.07]
-
-const colors = [
-  [0.10, 0.22, 0.66],
-  [1.00, 0.96, 0.91],
-  [0.05, 0.13, 0.31],
-  [0.89, 0.75, 0.33]
-]
+const backgroundColor = [217, 30, 44]
 
 const types = {
   'drop': 0,
@@ -112,12 +107,10 @@ function handleMouseDown(event) {
 
   const op = operations.pop()
   operations.unshift(op)
-  op.color = colors[Math.floor(Math.random() * colors.length)]
+  op.color = [...options.color]
   op.start = getPositionInBounds(bounds, mouse)
-  op.end = vec2.clone(op.start)
+  op.end = [...op.start]
   op.type = types[options.operationTypeSelection]
-
-  console.log(operations)
 
   isMouseDown = true
 }
@@ -145,8 +138,7 @@ gl.viewport(0, 0, canvas.width, canvas.height)
 gl.clear(gl.COLOR_BUFFER_BIT)
 
 for (let i = 0; i < 16; i++) {
-  const color = colors[Math.floor(Math.random() * colors.length)]
-  const operation = new Operation([0, 0], [0.1, 0.1], color, 0)
+  const operation = new Operation([0, 0], [0, 0], [0, 0, 0], 0)
   operations.unshift(operation)
 }
 
@@ -154,7 +146,6 @@ const shader = createShader(gl, vertexSource, fragmentSource)
 shader.bind()
 
 shader.uniforms.resolution = [canvas.width, canvas.height]
-shader.uniforms.colors = [].concat(...colors)
 shader.uniforms.backgroundColor = backgroundColor
 
 const engine = loop(() => {
