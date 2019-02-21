@@ -1,3 +1,6 @@
+// Using Jaffer et al's approach to mathematical marbling.
+// http://people.csail.mit.edu/jaffer/Marbling/
+
 precision mediump float;
 
 const float ALPHA = 0.25;
