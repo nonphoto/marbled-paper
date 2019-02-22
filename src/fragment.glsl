@@ -19,10 +19,6 @@ uniform vec2 resolution;
 uniform vec3 backgroundColor;
 uniform Operation operations[MAX_OPS];
 
-bool circleTest(vec2 p, vec2 c, float r) {
-  return length(p - c) < r;
-}
-
 vec4 getColorAtPosition(vec2 position) {
   vec2 p = position;
 
@@ -58,12 +54,13 @@ vec4 getColorAtPosition(vec2 position) {
       vec2 m = normalize(op.end - op.start);
       vec2 n = vec2(-m.y, m.x);
       vec2 d = p - op.start;
-      float s2 = length(op.end - op.start);
-      float s = s2 / 2.0;
+      float width = 0.1;
+      float halfWidth = 0.1 * 0.5;
+      float height = length(op.end - op.start);
       float l = length(dot(d, n));
-      float l2 = abs(mod(l, s2) - s);
-      float l3 = (ALPHA * LAMBDA) / (s - l2 + LAMBDA);
-      float l4 = l3 * (l2 / s) * (l2 / s) ;
+      float l2 = abs(mod(l, width) - halfWidth);
+      float l3 = (height * LAMBDA) / (halfWidth - l2 + LAMBDA);
+      float l4 = l3 * (l2 / halfWidth) * (l2 / halfWidth) ;
       p = p - (m * l4 * op.scale);
     }
 
