@@ -5,7 +5,7 @@ precision mediump float;
 
 const float ALPHA = 0.25;
 const float LAMBDA = 0.02;
-const int MAX_OPS = 16;
+const int MAX_OPS = 128;
 
 struct Operation {
   int type;
@@ -28,14 +28,14 @@ vec4 getColorAtPosition(vec2 position) {
     // Drop
     if (op.type == 0) {
       vec2 d = p - op.start;
-      float r = op.scale * length(op.end - op.start);
+      float r = length(op.end - op.start);
       float l = length(d);
-      if (l - r < 0.0) {
+      if (l < r) {
         return vec4(op.color / 255.0, 1.0);
       }
       else {
         float l2 = sqrt((l * l) - (r * r));
-        p = op.start + (d / l) * l2;
+        p = op.start + (d / l * l2);
       }
     }
 
@@ -51,17 +51,17 @@ vec4 getColorAtPosition(vec2 position) {
 
     // Comb
     else if (op.type == 2) {
-      vec2 m = normalize(op.end - op.start);
-      vec2 n = vec2(-m.y, m.x);
-      vec2 d = p - op.start;
-      float width = 0.1;
-      float halfWidth = 0.1 * 0.5;
-      float height = length(op.end - op.start);
-      float l = length(dot(d, n));
-      float l2 = abs(mod(l, width) - halfWidth);
-      float l3 = (height * LAMBDA) / (halfWidth - l2 + LAMBDA);
-      float l4 = l3 * (l2 / halfWidth) * (l2 / halfWidth) ;
-      p = p - (m * l4 * op.scale);
+      float alpha = length(op.end - op.start);
+      float beta = 0.1;
+
+      if (alpha > 0.01) {
+        vec2 m = (op.end - op.start) / alpha;
+        vec2 n = vec2(-m.y, m.x);
+        float l1 = length(dot(p - op.start, n));
+        float l2 = abs(mod(l1, beta * 2.0) - beta);
+        float l3 = (alpha * LAMBDA) / (beta - l2 + LAMBDA);
+        p = p - (m * l3 * pow(l2 / beta, 2.0));
+      }
     }
 
     // Smudge
@@ -69,12 +69,12 @@ vec4 getColorAtPosition(vec2 position) {
       vec2 m = normalize(op.end - op.start);
       vec2 n = vec2(-m.y, m.x);
       vec2 d = p - op.start;
-      float s = length(op.end - op.start);
-      float l = length(dot(d, n));
-      float l2 = abs(mod(l, 2.0) - 1.0);
-      float l3 = (s * LAMBDA) / (1.0 - l2 + LAMBDA);
-      float l4 = l3 * l2 * l2 ;
-      p = p - (m * l4 * op.scale);
+      float alpha = length(op.end - op.start);
+      float beta = 2.0 / (resolution.x + resolution.y);
+      float l1 = length(dot(d, n));
+      float l2 = abs(mod(l1, beta * 2.0) - beta);
+      float l3 = (alpha * LAMBDA) / (beta - l2 + LAMBDA);
+      p = p - (m * l3 * pow(l2 / beta, 2.0));
     }
 
     else {
