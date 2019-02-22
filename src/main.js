@@ -12,15 +12,24 @@ import ControlKit from 'controlkit'
 const viscosity = 10
 
 const options = {
-  operationType: ['drop', 'line', 'comb', 'smudge'],
-  operationTypeSelection: 'drop',
-  color: [255, 219, 93]
+  operation: ['drop', 'line', 'comb', 'smudge'],
+  operationSelection: 'drop',
+  palette: [
+    [86, 84, 240],
+    [87, 1, 153],
+    [186, 26, 38],
+    [240, 104, 54],
+    [255, 219, 93]
+  ]
 }
+
+options.color = options.palette[0]
+options.backgroundColor = options.palette[1]
 
 const controls = new ControlKit()
 const panel = controls.addPanel()
-panel.addSelect(options, 'operationType', { target: 'operationTypeSelection'})
-panel.addColor(options, 'color', { colorMode: 'rgb' })
+panel.addSelect(options, 'operation', { target: 'operationSelection'})
+panel.addColor(options, 'color', { colorMode: 'rgb', presets: 'palette' })
 
 // const backgroundColors = {
 //   'palette-1': [0.59, 0.05, 0.07],
@@ -62,8 +71,6 @@ panel.addColor(options, 'color', { colorMode: 'rgb' })
 //     0.18, 0.07, 0.49
 //   ]
 // }
-
-const backgroundColor = [217, 30, 44]
 
 const types = {
   'drop': 0,
@@ -110,7 +117,7 @@ canvas.addEventListener('mousedown', () => {
   op.color = [...options.color]
   op.start = getPositionInBounds(bounds, mouse)
   op.end = [...op.start]
-  op.type = types[options.operationTypeSelection]
+  op.type = types[options.operationSelection]
 
   isMouseDown = true
 })
@@ -142,7 +149,7 @@ const shader = createShader(gl, vertexSource, fragmentSource)
 shader.bind()
 
 shader.uniforms.resolution = [canvas.width, canvas.height]
-shader.uniforms.backgroundColor = backgroundColor
+shader.uniforms.backgroundColor = options.backgroundColor
 
 const engine = loop(() => {
   shader.uniforms.operations = operations
