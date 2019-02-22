@@ -12,8 +12,10 @@ import ControlKit from 'controlkit'
 const viscosity = 10
 
 const options = {
-  operation: ['drop', 'line', 'comb', 'smudge'],
+  operation: ['drop', 'comb'],
   operationSelection: 'drop',
+  size: ['tiny', 'small', 'medium', 'large'],
+  sizeSelection: 'medium',
   palette: [
     [86, 84, 240],
     [87, 1, 153],
@@ -28,7 +30,8 @@ options.backgroundColor = options.palette[1]
 
 const controls = new ControlKit()
 const panel = controls.addPanel()
-panel.addSelect(options, 'operation', { target: 'operationSelection'})
+panel.addSelect(options, 'operation', { target: 'operationSelection' })
+panel.addSelect(options, 'size', { target: 'sizeSelection' })
 panel.addColor(options, 'color', { colorMode: 'rgb', presets: 'palette' })
 
 // const backgroundColors = {
@@ -72,29 +75,13 @@ panel.addColor(options, 'color', { colorMode: 'rgb', presets: 'palette' })
 //   ]
 // }
 
-const types = {
-  'drop': 0,
-  'line': 1,
-  'comb': 2,
-  'smudge': 3
-}
-
 class Operation {
-  constructor(start, end, color, type) {
-    this.start = start
-    this.end = end
-    this.color = color
-    this.type = type
-    this.scale = 1
-  }
-
-  update() {
-    if (1 - this.scale > 0.0001) {
-      this.scale += (1 - this.scale) / viscosity
-    }
-    else {
-      this.scale = 1
-    }
+  constructor() {
+    this.start = [0, 0]
+    this.end = [0, 0]
+    this.color = [0, 0, 0]
+    this.type = -1
+    this.size = 0
   }
 }
 
@@ -117,7 +104,8 @@ canvas.addEventListener('mousedown', () => {
   op.color = [...options.color]
   op.start = getPositionInBounds(bounds, mouse)
   op.end = [...op.start]
-  op.type = types[options.operationSelection]
+  op.type = options.operation.indexOf(options.operationSelection)
+  op.size = options.size.indexOf(options.sizeSelection) + 1
 
   isMouseDown = true
 })
@@ -141,7 +129,7 @@ gl.viewport(0, 0, canvas.width, canvas.height)
 gl.clear(gl.COLOR_BUFFER_BIT)
 
 for (let i = 0; i < 128; i++) {
-  const operation = new Operation([0, 0], [0, 0], [0, 0, 0], 0)
+  const operation = new Operation()
   operations.unshift(operation)
 }
 

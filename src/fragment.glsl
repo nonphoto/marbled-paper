@@ -9,10 +9,10 @@ const int MAX_OPS = 128;
 
 struct Operation {
   int type;
+  float size;
+  vec3 color;
   vec2 start;
   vec2 end;
-  vec3 color;
-  float scale;
 };
 
 uniform vec2 resolution;
@@ -39,20 +39,11 @@ vec4 getColorAtPosition(vec2 position) {
       }
     }
 
-    // Line
-    else if (op.type == 1) {
-      vec2 m = normalize(op.end - op.start);
-      vec2 n = vec2(-m.y, m.x);
-      vec2 d = p - op.start;
-      float l = length(dot(d, n));
-      float l2 = (ALPHA * LAMBDA) / (l + LAMBDA);
-      p = p - (m * l2);
-    }
-
     // Comb
-    else if (op.type == 2) {
+    else if (op.type == 1) {
       float alpha = length(op.end - op.start);
-      float beta = 0.1;
+      float beta = ((op.size - 1.0) * 25.0) + 1.0;
+      beta *= 2.0 / (resolution.x + resolution.y);
 
       if (alpha > 0.01) {
         vec2 m = (op.end - op.start) / alpha;
@@ -62,23 +53,6 @@ vec4 getColorAtPosition(vec2 position) {
         float l3 = (alpha * LAMBDA) / (beta - l2 + LAMBDA);
         p = p - (m * l3 * pow(l2 / beta, 2.0));
       }
-    }
-
-    // Smudge
-    else if (op.type == 3) {
-      vec2 m = normalize(op.end - op.start);
-      vec2 n = vec2(-m.y, m.x);
-      vec2 d = p - op.start;
-      float alpha = length(op.end - op.start);
-      float beta = 2.0 / (resolution.x + resolution.y);
-      float l1 = length(dot(d, n));
-      float l2 = abs(mod(l1, beta * 2.0) - beta);
-      float l3 = (alpha * LAMBDA) / (beta - l2 + LAMBDA);
-      p = p - (m * l3 * pow(l2 / beta, 2.0));
-    }
-
-    else {
-      break;
     }
   }
 
