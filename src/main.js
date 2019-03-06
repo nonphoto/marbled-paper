@@ -11,6 +11,7 @@ import createTexture from 'gl-texture2d'
 import createFBO from 'gl-fbo'
 import {vec2} from 'gl-matrix'
 import ControlKit from 'controlkit'
+import Stats from 'stats.js'
 
 const viscosity = 10
 
@@ -92,6 +93,10 @@ class Operation {
   }
 }
 
+var stats = new Stats()
+stats.showPanel(1)
+document.body.appendChild(stats.dom)
+
 let mouse = vec2.create()
 let isMouseDown = false
 let operations = []
@@ -168,11 +173,13 @@ let fboIndex = 0
 const emptyTexture = createTexture(gl, [canvas.width, canvas.height])
 
 const engine = loop(() => {
+  stats.begin()
   unbindFBO(gl)
   shader.uniforms.backgroundTexture = options.background ? fbos[fboIndex].color[0].bind() : emptyTexture.bind()
   shader.uniforms.operationCount = options.foreground ? operations.length : 0
   shader.uniforms.operations = operations
   drawTriangle(gl)
+  stats.end()
 })
 
 engine.start()
