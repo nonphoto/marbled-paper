@@ -10,7 +10,7 @@ const int MAX_OPS = 32;
 struct Operation {
   int type;
   float size;
-  vec3 color;
+  vec4 color;
   vec2 start;
   vec2 end;
 };
@@ -36,7 +36,7 @@ vec4 getColorAtPosition(vec2 p) {
       float r = length(op.end - op.start);
       float l = length(d);
       if (l < r) {
-        return vec4(op.color / 255.0, 1.0);
+        return op.color;
       }
       else {
         float l2 = sqrt((l * l) - (r * r));
