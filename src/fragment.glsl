@@ -5,7 +5,7 @@ precision mediump float;
 
 const float ALPHA = 0.25;
 const float LAMBDA = 0.02;
-const int MAX_OPS = 128;
+const int MAX_OPS = 32;
 
 struct Operation {
   int type;
@@ -15,14 +15,19 @@ struct Operation {
   vec2 end;
 };
 
+uniform sampler2D backgroundTexture;
 uniform vec2 resolution;
 uniform vec3 backgroundColor;
+uniform int operationCount;
 uniform Operation operations[MAX_OPS];
 
-vec4 getColorAtPosition(vec2 position) {
-  vec2 p = position;
+vec4 getColorAtPosition(vec2 p) {
 
   for (int i = 0; i < MAX_OPS; i++) {
+    if (i >= operationCount) {
+      return texture2D(backgroundTexture, p);
+    }
+
     Operation op = operations[i];
 
     // Drop
@@ -56,7 +61,7 @@ vec4 getColorAtPosition(vec2 position) {
     }
   }
 
-  return vec4(backgroundColor / 255.0, 1.0);
+  return texture2D(backgroundTexture, p);
 }
 
 void main() {

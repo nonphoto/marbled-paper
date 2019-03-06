@@ -2,10 +2,13 @@ import getPositionInBounds from './get-position-in-bounds'
 import getContext from './get-context'
 import vertexSource from './vertex.glsl'
 import fragmentSource from './fragment.glsl'
+import unbindFBO from './unbind-fbo'
 
 import loop from 'raf-loop'
 import drawTriangle from 'a-big-triangle'
 import createShader from 'gl-shader'
+import createTexture from 'gl-texture2d'
+import createFBO from 'gl-fbo'
 import {vec2} from 'gl-matrix'
 import ControlKit from 'controlkit'
 
@@ -22,7 +25,9 @@ const options = {
     [186, 26, 38],
     [240, 104, 54],
     [255, 219, 93]
-  ]
+  ],
+  background: true,
+  foreground: true,
 }
 
 options.color = options.palette[0]
@@ -33,6 +38,8 @@ const panel = controls.addPanel()
 panel.addSelect(options, 'operation', { target: 'operationSelection' })
 panel.addSelect(options, 'size', { target: 'sizeSelection' })
 panel.addColor(options, 'color', { colorMode: 'rgb', presets: 'palette' })
+panel.addCheckbox(options, 'background')
+panel.addCheckbox(options, 'foreground')
 
 // const backgroundColors = {
 //   'palette-1': [0.59, 0.05, 0.07],
@@ -93,14 +100,26 @@ const canvas = document.querySelector('#render-canvas')
 const bounds = canvas.getBoundingClientRect()
 const gl = getContext(canvas)
 
-canvas.width = 512
-canvas.height = 512
+canvas.width = 1024
+canvas.height = 1024
 
 canvas.addEventListener('mousedown', () => {
-  if (event.button !== 0) return
+  if (event.button !== 0) {
+    isMouseDown = false
+    return
+  }
 
   const op = operations.pop()
   operations.unshift(op)
+
+  const previous = fbos[fboIndex]
+  const next = fbos[fboIndex ^= 1]
+  next.bind()
+  shader.uniforms.backgroundTexture = previous.color[0].bind()
+  shader.uniforms.operationCount = 1
+  shader.uniforms.operations = operations
+  drawTriangle(gl)
+
   op.color = [...options.color]
   op.start = getPositionInBounds(bounds, mouse)
   op.end = [...op.start]
@@ -128,20 +147,31 @@ gl.clearColor(0, 0, 1, 1)
 gl.viewport(0, 0, canvas.width, canvas.height)
 gl.clear(gl.COLOR_BUFFER_BIT)
 
-for (let i = 0; i < 128; i++) {
+for (let i = 0; i < 32; i++) {
   const operation = new Operation()
   operations.unshift(operation)
 }
 
 const shader = createShader(gl, vertexSource, fragmentSource)
 shader.bind()
-
+shader.uniforms.operationCount = operations.length
 shader.uniforms.resolution = [canvas.width, canvas.height]
 shader.uniforms.backgroundColor = options.backgroundColor
 
-const engine = loop(() => {
-  shader.uniforms.operations = operations
+const fbos = [
+  createFBO(gl, [canvas.width, canvas.height], { depth: false }),
+  createFBO(gl, [canvas.width, canvas.height], { depth: false })
+]
 
+let fboIndex = 0
+
+const emptyTexture = createTexture(gl, [canvas.width, canvas.height])
+
+const engine = loop(() => {
+  unbindFBO(gl)
+  shader.uniforms.backgroundTexture = options.background ? fbos[fboIndex].color[0].bind() : emptyTexture.bind()
+  shader.uniforms.operationCount = options.foreground ? operations.length : 0
+  shader.uniforms.operations = operations
   drawTriangle(gl)
 })
 
