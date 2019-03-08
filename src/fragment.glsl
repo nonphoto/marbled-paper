@@ -9,7 +9,7 @@ const int MAX_OPS = 32;
 
 struct Operation {
   int type;
-  float size;
+  float scale;
   vec4 color;
   vec2 start;
   vec2 end;
@@ -33,7 +33,7 @@ vec4 getColorAtPosition(vec2 p) {
     // Drop
     if (op.type == 0) {
       vec2 d = p - op.start;
-      float r = length(op.end - op.start);
+      float r = length(op.end - op.start) * op.scale;
       float l = length(d);
       if (l < r) {
         return op.color;
@@ -47,8 +47,7 @@ vec4 getColorAtPosition(vec2 p) {
     // Comb
     else if (op.type == 1) {
       float alpha = length(op.end - op.start);
-      float beta = ((op.size - 1.0) * 25.0) + 1.0;
-      beta *= 2.0 / (resolution.x + resolution.y);
+      float beta = max(op.scale * 0.25, 2.0 / (resolution.x + resolution.y));
 
       if (alpha > 0.01) {
         vec2 m = (op.end - op.start) / alpha;

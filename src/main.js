@@ -22,34 +22,21 @@ function toFloatColor(c) {
 const viscosity = 10
 
 const options = {
-  operation: ['drop', 'comb'],
-  operationSelection: 'drop',
-  size: ['tiny', 'small', 'medium', 'large'],
-  sizeSelection: 'medium',
-  palette: palettes[0],
+  operationPalette: ['drop-small', 'drop-large', 'spray-narrow', 'spray-wide', 'comb-narrow', 'comb-wide', 'smudge'],
+  colorPalette: palettes[0],
   background: true,
   foreground: true,
 }
 
-options.color = options.palette[1]
+options.color = options.colorPalette[1]
+options.operation = options.operationPalette[0]
 
 const controls = new ControlKit()
 const panel = controls.addPanel()
-panel.addSelect(options, 'operation', { target: 'operationSelection' })
-panel.addSelect(options, 'size', { target: 'sizeSelection' })
-panel.addColor(options, 'color', { colorMode: 'hex', presets: 'palette', })
+panel.addSelect(options, 'operationPalette', { target: 'operation' })
+panel.addColor(options, 'color', { colorMode: 'hex', presets: 'colorPalette', })
 panel.addCheckbox(options, 'background')
 panel.addCheckbox(options, 'foreground')
-
-class Operation {
-  constructor() {
-    this.start = [0, 0]
-    this.end = [0, 0]
-    this.color = [0, 0, 0, 0]
-    this.type = -1
-    this.size = 0
-  }
-}
 
 var stats = new Stats()
 stats.showPanel(1)
@@ -66,12 +53,17 @@ const gl = getContext(canvas)
 canvas.width = 1024
 canvas.height = 1024
 
-canvas.addEventListener('mousedown', () => {
-  if (event.button !== 0) {
-    isMouseDown = false
-    return
+function createOperation() {
+  return {
+    type: -1,
+    color: [0, 0, 0, 0],
+    start: [0, 0],
+    end: [0, 0],
+    scale: 0,
   }
+}
 
+function shiftOperations() {
   const op = operations.pop()
   operations.unshift(op)
 
@@ -83,11 +75,49 @@ canvas.addEventListener('mousedown', () => {
   shader.uniforms.operations = operations
   drawTriangle(gl)
 
+  return op
+}
+
+function addDrop(start, scale) {
+  const op = shiftOperations()
+  op.type = 0
   op.color = toFloatColor(options.color)
-  op.start = getPositionInBounds(bounds, mouse)
-  op.end = [...op.start]
-  op.type = options.operation.indexOf(options.operationSelection)
-  op.size = options.size.indexOf(options.sizeSelection) + 1
+  op.start = [...start]
+  op.end = [...start]
+  op.end[0] += scale
+  op.scale = 1
+  return op
+}
+
+function addComb(start, scale) {
+  const op = shiftOperations()
+  op.type = 1
+  op.color = toFloatColor(options.color)
+  op.start = [...start]
+  op.end = [...start]
+  op.scale = scale
+  return op
+}
+
+canvas.addEventListener('mousedown', () => {
+  if (event.button !== 0) {
+    isMouseDown = false
+    return
+  }
+
+  const position = getPositionInBounds(bounds, mouse)
+
+  if (options.operation === 'drop-small') {
+    addDrop(position, Math.random())
+  } else if (options.operation === 'drop-large') {
+    addDrop(position, Math.random())
+  } else if (options.operation === 'comb-narrow') {
+    addComb(position, Math.random())
+  } else if (options.operation === 'comb-wide') {
+    addComb(position, Math.random())
+  } else if (options.operation === 'smudge') {
+    addComb(position, 0)
+  }
 
   isMouseDown = true
 })
@@ -98,7 +128,15 @@ document.addEventListener('mousemove', () => {
 
   if (isMouseDown) {
     const op = operations[0]
-    op.end = getPositionInBounds(bounds, mouse)
+    const position = getPositionInBounds(bounds, mouse)
+
+    if (options.operation === 'comb-narrow') {
+      op.end = position
+    } else if (options.operation === 'comb-wide') {
+      op.end = position
+    } else if (options.operation === 'smudge') {
+      op.end = position
+    }
   }
 })
 
@@ -106,13 +144,12 @@ document.addEventListener('mouseup', () => {
   isMouseDown = false
 })
 
-gl.clearColor(...toFloatColor(options.palette[0]))
+gl.clearColor(...toFloatColor(options.colorPalette[0]))
 gl.viewport(0, 0, canvas.width, canvas.height)
 gl.clear(gl.COLOR_BUFFER_BIT)
 
 for (let i = 0; i < 32; i++) {
-  const operation = new Operation()
-  operations.unshift(operation)
+  operations.push(createOperation())
 }
 
 const shader = createShader(gl, vertexSource, fragmentSource)
@@ -135,6 +172,16 @@ let fboIndex = 0
 const emptyTexture = createTexture(gl, [canvas.width, canvas.height])
 
 const engine = loop(() => {
+  if (isMouseDown) {
+    const position = getPositionInBounds(bounds, mouse)
+
+    if (options.operation === 'spray-narrow') {
+      addDrop(position, Math.random() * 0.1)
+    } else if (options.operation === 'spray-wide') {
+      addDrop(position, Math.random() * 0.1)
+    }
+  }
+
   stats.begin()
   unbindFBO(gl)
   shader.uniforms.backgroundTexture = options.background ? fbos[fboIndex].color[0].bind() : emptyTexture.bind()
