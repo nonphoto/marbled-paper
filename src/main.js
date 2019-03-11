@@ -1,7 +1,7 @@
 import getPositionInBounds from './get-position-in-bounds.js'
 import getContext from './get-context.js'
-import vertexSource from './vertex.glsl'
-import fragmentSource from './fragment.glsl'
+import vertexSource from './marble.vert'
+import fragmentSource from './marble.frag'
 import unbindFBO from './unbind-fbo.js'
 import palettes from './palettes.js'
 
