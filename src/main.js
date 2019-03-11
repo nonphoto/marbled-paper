@@ -24,6 +24,7 @@ function toFloatColor(c) {
 }
 
 const viscosity = 5
+const maxOperations = 32
 
 const stats = new Stats()
 
@@ -48,6 +49,7 @@ const controls = new ControlKit()
 const panel = controls.addPanel()
 panel.addSelect(options, 'operationPalette', { target: 'operation' })
 panel.addColor(options, 'color', { colorMode: 'hex', presets: 'colorPalette', })
+panel.addButton('reset', clearCanvas)
 
 let mouse = vec2.create()
 let isMouseDown = false
@@ -106,6 +108,21 @@ function addComb(start, scale) {
   return op
 }
 
+function clearCanvas() {
+  gl.clearColor(...toFloatColor(options.colorPalette[0]))
+  gl.viewport(0, 0, canvas.width, canvas.height)
+  gl.clear(gl.COLOR_BUFFER_BIT)
+
+  fbos[0].bind()
+  gl.clear(gl.COLOR_BUFFER_BIT)
+  fbos[1].bind()
+  gl.clear(gl.COLOR_BUFFER_BIT)
+
+  for (let i = 0; i < maxOperations; i++) {
+    operations[i] = createOperation()
+  }
+}
+
 canvas.addEventListener('mousedown', () => {
   if (event.button !== 0) {
     isMouseDown = false
@@ -151,13 +168,6 @@ document.addEventListener('mouseup', () => {
   isMouseDown = false
 })
 
-gl.clearColor(...toFloatColor(options.colorPalette[0]))
-gl.viewport(0, 0, canvas.width, canvas.height)
-gl.clear(gl.COLOR_BUFFER_BIT)
-
-for (let i = 0; i < 32; i++) {
-  operations.push(createOperation())
-}
 
 const shader = createShader(gl, vertexSource, fragmentSource)
 shader.bind()
@@ -169,14 +179,11 @@ const fbos = [
   createFBO(gl, [canvas.width, canvas.height], { depth: false })
 ]
 
-fbos[0].bind()
-gl.clear(gl.COLOR_BUFFER_BIT)
-fbos[1].bind()
-gl.clear(gl.COLOR_BUFFER_BIT)
-
 let fboIndex = 0
 
 const emptyTexture = createTexture(gl, [canvas.width, canvas.height])
+
+clearCanvas()
 
 const engine = loop(() => {
   if (isMouseDown) {
