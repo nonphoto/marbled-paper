@@ -4,7 +4,12 @@
   "description": "",
   "main": "src/main.js",
   "scripts": {
-    "start": "parcel index.html --no-hmr"
+    "start": "parcel index.html --no-hmr",
+    "clean": "rm -rf dist .cache",
+    "build": "npm run clean && parcel build index.html",
+    "now-build": "npm run build",
+    "deploy": "now",
+    "alias": "now alias"
   },
   "repository": {
     "type": "git",

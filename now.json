@@ -1,0 +1,10 @@
+{
+    "version": 2,
+    "name": "marbled-paper",
+    "alias": [
+        "marbled-paper.jonasluebbers.com"
+    ],
+    "builds": [
+        { "src": "package.json", "use": "@now/static-build" }
+    ]
+}
