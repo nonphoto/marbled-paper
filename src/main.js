@@ -25,11 +25,20 @@ function toFloatColor(c) {
 
 const viscosity = 10
 
+const stats = new Stats()
+
+window.debugOptions = {
+  showStats: () => {
+    stats.showPanel(1)
+    document.body.appendChild(stats.dom)
+  },
+  background: true,
+  foreground: true,
+}
+
 const options = {
   operationPalette: ['drop-small', 'drop-large', 'spray-narrow', 'spray-wide', 'comb-narrow', 'comb-wide', 'smudge'],
   colorPalette: palettes[0],
-  background: true,
-  foreground: true,
 }
 
 options.color = options.colorPalette[1]
@@ -39,12 +48,6 @@ const controls = new ControlKit()
 const panel = controls.addPanel()
 panel.addSelect(options, 'operationPalette', { target: 'operation' })
 panel.addColor(options, 'color', { colorMode: 'hex', presets: 'colorPalette', })
-panel.addCheckbox(options, 'background')
-panel.addCheckbox(options, 'foreground')
-
-var stats = new Stats()
-stats.showPanel(1)
-document.body.appendChild(stats.dom)
 
 let mouse = vec2.create()
 let isMouseDown = false
@@ -188,8 +191,8 @@ const engine = loop(() => {
 
   stats.begin()
   unbindFBO(gl)
-  shader.uniforms.backgroundTexture = options.background ? fbos[fboIndex].color[0].bind() : emptyTexture.bind()
-  shader.uniforms.operationCount = options.foreground ? operations.length : 0
+  shader.uniforms.backgroundTexture = window.debugOptions.background ? fbos[fboIndex].color[0].bind() : emptyTexture.bind()
+  shader.uniforms.operationCount = window.debugOptions.foreground ? operations.length : 0
   shader.uniforms.operations = operations
   drawTriangle(gl)
   stats.end()
