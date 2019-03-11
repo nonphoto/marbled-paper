@@ -15,6 +15,10 @@ import hexRgb from 'hex-rgb'
 import ControlKit from 'controlkit'
 import Stats from 'stats.js'
 
+function randomInRange(min, max) {
+  return Math.random() * (max - min) + min
+}
+
 function toFloatColor(c) {
   return hexRgb(c, {format: 'array'}).map(x => x / 255)
 }
@@ -108,13 +112,13 @@ canvas.addEventListener('mousedown', () => {
   const position = getPositionInBounds(bounds, mouse)
 
   if (options.operation === 'drop-small') {
-    addDrop(position, Math.random())
+    addDrop(position, randomInRange(0.02, 0.1))
   } else if (options.operation === 'drop-large') {
-    addDrop(position, Math.random())
+    addDrop(position, randomInRange(0.1, 0.2))
   } else if (options.operation === 'comb-narrow') {
-    addComb(position, Math.random())
+    addComb(position, randomInRange(0.1, 0.3))
   } else if (options.operation === 'comb-wide') {
-    addComb(position, Math.random())
+    addComb(position, randomInRange(0.3, 0.6))
   } else if (options.operation === 'smudge') {
     addComb(position, 0)
   }
@@ -176,9 +180,9 @@ const engine = loop(() => {
     const position = getPositionInBounds(bounds, mouse)
 
     if (options.operation === 'spray-narrow') {
-      addDrop(position, Math.random() * 0.1)
+      addDrop(position, randomInRange(0.01, 0.02))
     } else if (options.operation === 'spray-wide') {
-      addDrop(position, Math.random() * 0.1)
+      addDrop(position, randomInRange(0.01, 0.02))
     }
   }
 
