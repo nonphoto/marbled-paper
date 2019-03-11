@@ -1,9 +1,7 @@
-import getPositionInBounds from './get-position-in-bounds.js'
-import getContext from './get-context.js'
+import * as util from './util'
+import palette from './palette.js'
 import vertexSource from './marble.vert'
 import fragmentSource from './marble.frag'
-import unbindFBO from './unbind-fbo.js'
-import palette from './palette.js'
 
 import loop from 'raf-loop'
 import drawTriangle from 'a-big-triangle'
@@ -11,18 +9,9 @@ import createShader from 'gl-shader'
 import createTexture from 'gl-texture2d'
 import createFBO from 'gl-fbo'
 import { vec2 } from 'gl-matrix'
-import hexRgb from 'hex-rgb'
 import ControlKit from 'controlkit'
 import Stats from 'stats.js'
 import shuffle from 'lodash.shuffle'
-
-function randomInRange(min, max) {
-  return Math.random() * (max - min) + min
-}
-
-function toFloatColor(c) {
-  return hexRgb(c, {format: 'array'}).map(x => x / 255)
-}
 
 const viscosity = 5
 const maxOperations = 32
@@ -58,7 +47,7 @@ let operations = []
 
 const canvas = document.querySelector('#render-canvas')
 const bounds = canvas.getBoundingClientRect()
-const gl = getContext(canvas)
+const gl = util.getGLContext(canvas)
 
 canvas.width = 1024
 canvas.height = 1024
@@ -91,7 +80,7 @@ function shiftOperations() {
 function addDrop(start, scale) {
   const op = shiftOperations()
   op.type = 0
-  op.color = toFloatColor(options.color)
+  op.color = util.toFloatColor(options.color)
   op.start = [...start]
   op.end = [...start]
   op.end[0] += scale
@@ -102,7 +91,7 @@ function addDrop(start, scale) {
 function addComb(start, scale) {
   const op = shiftOperations()
   op.type = 1
-  op.color = toFloatColor(options.color)
+  op.color = util.toFloatColor(options.color)
   op.start = [...start]
   op.end = [...start]
   op.scale = scale
@@ -113,7 +102,7 @@ function clearCanvas() {
   const palette = shuffle(options.colorPalette)
   options.color = palette[1]
 
-  gl.clearColor(...toFloatColor(palette[0]))
+  gl.clearColor(...util.toFloatColor(palette[0]))
   gl.viewport(0, 0, canvas.width, canvas.height)
   gl.clear(gl.COLOR_BUFFER_BIT)
 
@@ -133,16 +122,16 @@ canvas.addEventListener('mousedown', () => {
     return
   }
 
-  const position = getPositionInBounds(bounds, mouse)
+  const position = util.getPositionInBounds(bounds, mouse)
 
   if (options.operation === 'drop-small') {
-    addDrop(position, randomInRange(0.025, 0.1))
+    addDrop(position, util.randomInRange(0.025, 0.1))
   } else if (options.operation === 'drop-large') {
-    addDrop(position, randomInRange(0.1, 0.2))
+    addDrop(position, util.randomInRange(0.1, 0.2))
   } else if (options.operation === 'comb-narrow') {
-    addComb(position, randomInRange(0.1, 0.3))
+    addComb(position, util.randomInRange(0.1, 0.3))
   } else if (options.operation === 'comb-wide') {
-    addComb(position, randomInRange(0.3, 0.6))
+    addComb(position, util.randomInRange(0.3, 0.6))
   } else if (options.operation === 'smudge') {
     addComb(position, 0)
   }
@@ -156,7 +145,7 @@ document.addEventListener('mousemove', () => {
 
   if (isMouseDown) {
     const op = operations[0]
-    const position = getPositionInBounds(bounds, mouse)
+    const position = util.getPositionInBounds(bounds, mouse)
 
     if (options.operation === 'comb-narrow') {
       op.end = position
@@ -191,15 +180,15 @@ clearCanvas()
 
 const engine = loop(() => {
   if (isMouseDown) {
-    const position = getPositionInBounds(bounds, mouse)
+    const position = util.getPositionInBounds(bounds, mouse)
     const offset = vec2.random(vec2.create(), Math.random())
 
     if (options.operation === 'spray-narrow') {
       vec2.scaleAndAdd(position, position, offset, 0.1)
-      addDrop(position, randomInRange(0.005, 0.015))
+      addDrop(position, util.randomInRange(0.005, 0.015))
     } else if (options.operation === 'spray-wide') {
       vec2.scaleAndAdd(position, position, offset, 0.3)
-      addDrop(position, randomInRange(0.01, 0.02))
+      addDrop(position, util.randomInRange(0.01, 0.02))
     }
   }
 
@@ -210,7 +199,7 @@ const engine = loop(() => {
   }
 
   stats.begin()
-  unbindFBO(gl)
+  util.unbindFBO(gl)
   shader.uniforms.backgroundTexture = window.debugOptions.background ? fbos[fboIndex].color[0].bind() : emptyTexture.bind()
   shader.uniforms.operationCount = window.debugOptions.foreground ? operations.length : 0
   shader.uniforms.operations = operations
