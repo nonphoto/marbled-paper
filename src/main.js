@@ -23,7 +23,7 @@ function toFloatColor(c) {
   return hexRgb(c, {format: 'array'}).map(x => x / 255)
 }
 
-const viscosity = 10
+const viscosity = 5
 
 const stats = new Stats()
 
@@ -92,7 +92,7 @@ function addDrop(start, scale) {
   op.start = [...start]
   op.end = [...start]
   op.end[0] += scale
-  op.scale = 1
+  op.scale = 0
   return op
 }
 
@@ -181,11 +181,20 @@ const emptyTexture = createTexture(gl, [canvas.width, canvas.height])
 const engine = loop(() => {
   if (isMouseDown) {
     const position = getPositionInBounds(bounds, mouse)
+    const offset = vec2.random(vec2.create(), Math.random())
 
     if (options.operation === 'spray-narrow') {
-      addDrop(position, randomInRange(0.01, 0.02))
+      vec2.scaleAndAdd(position, position, offset, 0.1)
+      addDrop(position, randomInRange(0.005, 0.015))
     } else if (options.operation === 'spray-wide') {
+      vec2.scaleAndAdd(position, position, offset, 0.3)
       addDrop(position, randomInRange(0.01, 0.02))
+    }
+  }
+
+  for (let op of operations) {
+    if (op.type === 0) {
+      op.scale += (1 - op.scale) / viscosity
     }
   }
 
