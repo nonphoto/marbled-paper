@@ -3,7 +3,7 @@ import getContext from './get-context.js'
 import vertexSource from './marble.vert'
 import fragmentSource from './marble.frag'
 import unbindFBO from './unbind-fbo.js'
-import palettes from './palettes.js'
+import palette from './palette.js'
 
 import loop from 'raf-loop'
 import drawTriangle from 'a-big-triangle'
@@ -14,6 +14,7 @@ import { vec2 } from 'gl-matrix'
 import hexRgb from 'hex-rgb'
 import ControlKit from 'controlkit'
 import Stats from 'stats.js'
+import shuffle from 'lodash.shuffle'
 
 function randomInRange(min, max) {
   return Math.random() * (max - min) + min
@@ -39,16 +40,16 @@ window.debugOptions = {
 
 const options = {
   operationPalette: ['drop-small', 'drop-large', 'spray-narrow', 'spray-wide', 'comb-narrow', 'comb-wide', 'smudge'],
-  colorPalette: palettes[0],
+  colorPalette: palette,
 }
 
 options.color = options.colorPalette[1]
 options.operation = options.operationPalette[0]
 
 const controls = new ControlKit()
-const panel = controls.addPanel()
-panel.addSelect(options, 'operationPalette', { target: 'operation' })
-panel.addColor(options, 'color', { colorMode: 'hex', presets: 'colorPalette', })
+const panel = controls.addPanel({ width: 250 })
+panel.addSelect(options, 'operationPalette', { label: 'Tool', target: 'operation' })
+panel.addColor(options, 'color', { label: 'Color', colorMode: 'hex', presets: 'colorPalette', })
 panel.addButton('reset', clearCanvas)
 
 let mouse = vec2.create()
@@ -109,7 +110,10 @@ function addComb(start, scale) {
 }
 
 function clearCanvas() {
-  gl.clearColor(...toFloatColor(options.colorPalette[0]))
+  const palette = shuffle(options.colorPalette)
+  options.color = palette[1]
+
+  gl.clearColor(...toFloatColor(palette[0]))
   gl.viewport(0, 0, canvas.width, canvas.height)
   gl.clear(gl.COLOR_BUFFER_BIT)
 
@@ -132,7 +136,7 @@ canvas.addEventListener('mousedown', () => {
   const position = getPositionInBounds(bounds, mouse)
 
   if (options.operation === 'drop-small') {
-    addDrop(position, randomInRange(0.02, 0.1))
+    addDrop(position, randomInRange(0.025, 0.1))
   } else if (options.operation === 'drop-large') {
     addDrop(position, randomInRange(0.1, 0.2))
   } else if (options.operation === 'comb-narrow') {
